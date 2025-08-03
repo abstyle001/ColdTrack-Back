@@ -11,6 +11,4 @@ public class Department
     public long Id;
     // 部门名称
     [Required] public string Name { get; set; } = string.Empty;
-    [MaxLength(50)]
-    public string Code { get; set; }
 }
