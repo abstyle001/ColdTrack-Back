@@ -18,4 +18,6 @@ public class Position
     public string Workspace { get; set; } = string.Empty;
     // 附加信息
     public string? Addition { get; set; } = string.Empty;
+    // 创建时间
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
