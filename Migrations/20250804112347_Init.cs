@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ColdTrack_Back.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -54,6 +54,22 @@ namespace ColdTrack_Back.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Positions",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Duty = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Workspace = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Addition = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Positions", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -167,8 +183,8 @@ namespace ColdTrack_Back.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "1d7179ad-927c-4e34-87a8-dc089b634267", null, "User", "USER" },
-                    { "c36b5cf8-f053-4f7d-b8da-f7c8041565f0", null, "Admin", "ADMIN" }
+                    { "66e95fa5-18ea-4d76-86f6-2d88fdc9a2c2", null, "Admin", "ADMIN" },
+                    { "dcd96566-4059-4e44-b05f-d1ef87478f9a", null, "User", "USER" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -228,6 +244,9 @@ namespace ColdTrack_Back.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "Positions");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

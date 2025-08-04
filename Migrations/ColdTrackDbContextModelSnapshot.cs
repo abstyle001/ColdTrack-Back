@@ -101,6 +101,34 @@ namespace ColdTrack_Back.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("ColdTrack_Back.Models.Position", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Addition")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Duty")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Workspace")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Positions");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -130,13 +158,13 @@ namespace ColdTrack_Back.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "c36b5cf8-f053-4f7d-b8da-f7c8041565f0",
+                            Id = "66e95fa5-18ea-4d76-86f6-2d88fdc9a2c2",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "1d7179ad-927c-4e34-87a8-dc089b634267",
+                            Id = "dcd96566-4059-4e44-b05f-d1ef87478f9a",
                             Name = "User",
                             NormalizedName = "USER"
                         });
