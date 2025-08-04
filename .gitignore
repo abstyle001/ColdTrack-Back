@@ -1,5 +1,8 @@
 .idea/
 bin/
 obj/
-/.vs/ColdTrack-Back
+.vs/
 *.user
+Statics/
+appsettings.Development.json
+appsettings.json
