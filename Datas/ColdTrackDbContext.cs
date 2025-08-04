@@ -8,6 +8,9 @@ namespace ColdTrack_Back.Datas;
 public class ColdTrackDbContext(DbContextOptions<ColdTrackDbContext> options) : IdentityDbContext<AppUser, IdentityRole, string>(options)
 {
     public DbSet<Position> Positions { get; set; }
+    public DbSet<Department> Departments { get; set; }
+    public DbSet<UserPosition> UserPositions { get; set; }
+    public DbSet<PositionDepartment> PositionDepartments { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
