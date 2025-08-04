@@ -1,4 +1,8 @@
 .idea/
 bin/
 obj/
+.vs/
+*.user
+Statics/
 appsettings.Development.json
+appsettings.json

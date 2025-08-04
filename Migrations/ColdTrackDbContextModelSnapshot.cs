@@ -242,13 +242,13 @@ namespace ColdTrack_Back.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "a2b0fdc3-40d2-41e3-98b1-f5136e50838d",
+                            Id = "1c4028fc-5cc3-4547-8850-32d5bffc6098",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "c5d05f04-4d16-4e61-b8a4-68d44c103958",
+                            Id = "8473c4d7-b386-4a0c-9d2c-129ca80738d1",
                             Name = "User",
                             NormalizedName = "USER"
                         });
