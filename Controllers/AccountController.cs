@@ -44,7 +44,8 @@ public class AccountController(
                 Email = dto.Email,
                 NickName = dto.NickName ?? string.Empty,
                 City = dto.City ?? string.Empty,
-                PhoneNumber = dto.Phone ?? string.Empty
+                PhoneNumber = dto.Phone ?? string.Empty,
+                CreatedAt = DateTime.UtcNow
             };
             var createUser = await userManager.CreateAsync(appUser, dto.Password);
             if (createUser.Succeeded)
