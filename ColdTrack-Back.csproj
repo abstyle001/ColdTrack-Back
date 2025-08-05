@@ -25,11 +25,6 @@
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Migrations\" />
-      <Folder Include="Statics\Avatars\" />
-    </ItemGroup>
-
     <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
 
 </Project>
