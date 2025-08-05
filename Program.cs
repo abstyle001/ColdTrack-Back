@@ -48,6 +48,10 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<PositionRepository>();
+builder.Services.AddScoped<DepartmentRepository>();
+builder.Services.AddScoped<UserPositionRepository>();
+builder.Services.AddScoped<PositionDepartmentRepository>();
 builder.Services.AddScoped<TokenService>();
 
 var app = builder.Build();

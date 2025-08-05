@@ -11,6 +11,7 @@ public class ColdTrackDbContext(DbContextOptions<ColdTrackDbContext> options) : 
     public DbSet<Department> Departments { get; set; }
     public DbSet<UserPosition> UserPositions { get; set; }
     public DbSet<PositionDepartment> PositionDepartments { get; set; }
+    public DbSet<DiscardDepartment> DiscardDepartments { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

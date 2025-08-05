@@ -13,5 +13,9 @@ public class RegisterUserDto
     public string? City { get; set; }
     public string? Phone { get; set; }
     public IFormFile? File { get; set; }
+    // 所属职位
+    public string? PositionId { get; set; }
+    // 所属部门
+    public string? DepartmentId { get; set; }
 }
 

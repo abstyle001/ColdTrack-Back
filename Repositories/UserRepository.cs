@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ColdTrack_Back.Repositories;
 
+/*
+ * 用户数据操作
+ */
 public class UserRepository(ColdTrackDbContext db, IConfiguration config, IWebHostEnvironment env)
 {
     public UserDto? GetUserInfo(string id)
