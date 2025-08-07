@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ColdTrack_Back.Controllers;
 
 [ApiController]
-[Route("department")]
+[Route("[controller]")]
 public class DepartmentController(DepartmentRepository departmentRepository) : ControllerBase
 {
     [HttpPost]
@@ -29,5 +29,19 @@ public class DepartmentController(DepartmentRepository departmentRepository) : C
         }
 
         return Ok(departmentDto);
+    }
+    
+    [HttpDelete]
+    [Route("{id}")]
+    // [Authorize(Roles = RoleType.Admin)]
+    public async Task<ActionResult<DepartmentDto>> DeleteDepartment([FromRoute] string id)
+    {
+        var department = await departmentRepository.DeleteDepartment(id);
+        if (department == null)
+        {
+            return BadRequest("所删除的部门不存在");
+        }
+
+        return Ok(department);
     }
 }
