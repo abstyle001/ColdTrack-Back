@@ -101,21 +101,21 @@ namespace ColdTrack_Back.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "87573c09-63d8-4cb8-8966-b2bc21b5a5a4",
+                            Id = "8a016a79-e64b-4fe7-8522-b3fbbf6978dc",
                             AccessFailedCount = 0,
                             City = "北京市",
-                            ConcurrencyStamp = "f94d1c78-8881-4026-9fcc-130025b74a4b",
-                            CreatedAt = new DateTime(2025, 8, 5, 21, 10, 18, 841, DateTimeKind.Utc).AddTicks(8138),
+                            ConcurrencyStamp = "7a27ae8e-b1ea-4c4c-a1e7-3dcc0f8fa975",
+                            CreatedAt = new DateTime(2025, 8, 6, 21, 9, 27, 14, DateTimeKind.Utc).AddTicks(1245),
                             Email = "admin@cold.com",
                             EmailConfirmed = false,
                             LockoutEnabled = true,
                             NickName = "Admin",
                             NormalizedEmail = "ADMIN@COLD.COM",
                             NormalizedUserName = "ADMIN@COLD.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEN74YQF5HOAj5SVttYLhbOeDBK7FFl4o1f87sLmUneGOyII15AN/w6bOGdE09Ti/7A==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEN9BTE2hnLufpWx/Msi6TbLkJHB20J/BQy+eGbhlf9o79ZTB5TxKtI3OITHYh9YS9g==",
                             PhoneNumber = "17323895436",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "05234f67-fc84-4b1c-8e67-8e4675719da5",
+                            SecurityStamp = "8c15bcb9-c3e2-45f8-8b8d-49a2dbb138a5",
                             TwoFactorEnabled = false,
                             UserName = "admin@cold.com"
                         });
@@ -140,6 +140,10 @@ namespace ColdTrack_Back.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ManagerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MaxSeq")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -168,9 +172,8 @@ namespace ColdTrack_Back.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("ChildId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("ChildId")
+                        .HasColumnType("int");
 
                     b.Property<string>("ParentId")
                         .IsRequired()
@@ -283,13 +286,13 @@ namespace ColdTrack_Back.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "457192a0-541a-40cf-aae2-aaff4f3ed601",
+                            Id = "f0874ebd-be74-4a5e-951a-c738f27f6cb8",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "a3d3433f-ca1c-49f7-aaab-964c977eab82",
+                            Id = "7d06dcab-5a11-482e-b015-cf5f6569d5a3",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -384,8 +387,8 @@ namespace ColdTrack_Back.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = "87573c09-63d8-4cb8-8966-b2bc21b5a5a4",
-                            RoleId = "457192a0-541a-40cf-aae2-aaff4f3ed601"
+                            UserId = "8a016a79-e64b-4fe7-8522-b3fbbf6978dc",
+                            RoleId = "f0874ebd-be74-4a5e-951a-c738f27f6cb8"
                         });
                 });
 

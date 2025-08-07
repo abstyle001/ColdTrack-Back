@@ -15,6 +15,9 @@ public class Department
     // 父节点Id
     [Required]
     public string ParentId { get; set; }
+    // 当前部门下最大的子部门Id
+    [Required]
+    public string MaxSeq { get; set; }
     // 职位层级
     [Required]
     public int Level { get; set; }

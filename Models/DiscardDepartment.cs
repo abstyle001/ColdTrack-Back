@@ -13,5 +13,5 @@ public class DiscardDepartment
     public string ParentId { get; set; }
     // 废弃的部门Id，与ParentId拼接可得到完整的DepartmentId
     [Required]
-    public string ChildId { get; set; }
+    public int ChildId { get; set; }
 }
