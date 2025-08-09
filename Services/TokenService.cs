@@ -15,8 +15,9 @@ public class TokenService(IConfiguration config)
     {
         var claims = new List<Claim>
         {
+            new Claim("id", user.Id),
             new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
-            new Claim(JwtRegisteredClaimNames.GivenName, user.UserName ?? string.Empty),
+            new Claim(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
         };
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 

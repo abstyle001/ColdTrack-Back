@@ -1,4 +1,6 @@
-﻿using ColdTrack_Back.Datas;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using ColdTrack_Back.Datas;
 using ColdTrack_Back.Dtos;
 using ColdTrack_Back.Models;
 using ColdTrack_Back.Services;
@@ -31,6 +33,7 @@ public class AccountController(
             {
                 return BadRequest(ModelState);
             }
+
             var user = await db.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Email == dto.Email);
@@ -38,6 +41,7 @@ public class AccountController(
             {
                 return BadRequest("用户已存在");
             }
+
             var appUser = new AppUser
             {
                 UserName = dto.Email,
@@ -59,6 +63,7 @@ public class AccountController(
                 await db.SaveChangesAsync();
                 return Ok(tokenService.CreateToken(appUser, roles));
             }
+
             return StatusCode(500, createUser.Errors);
         }
         catch (Exception e)
@@ -77,16 +82,19 @@ public class AccountController(
             {
                 return BadRequest(ModelState);
             }
+
             var user = await userManager.Users.FirstOrDefaultAsync(x => x.Email == dto.Email);
             if (user == null)
             {
                 return BadRequest("用户不存在");
             }
+
             var result = await signInManager.CheckPasswordSignInAsync(user, dto.Password, false);
             if (!result.Succeeded)
             {
                 return BadRequest("密码错误");
             }
+
             var roles = await userManager.GetRolesAsync(user);
             return Ok(tokenService.CreateToken(user, roles));
         }
@@ -94,5 +102,23 @@ public class AccountController(
         {
             return StatusCode(500, e.Message);
         }
+    }
+
+    [HttpGet]
+    [Route("me")]
+    [Authorize(Roles = RoleType.User)]
+    public ActionResult<TokenClaim> GetProfile()
+    {
+        var id = User.FindFirstValue("id");
+        var email = User.FindFirstValue(JwtRegisteredClaimNames.Email);
+        var userName = User.FindFirstValue(JwtRegisteredClaimNames.Name);
+        var role = User.FindFirstValue(ClaimTypes.Role);
+        return Ok(new TokenClaim
+        {
+            Id = id ?? string.Empty,
+            Email = email ?? string.Empty,
+            UserName = userName ?? string.Empty,
+            Role = role ?? string.Empty
+        });
     }
 }
