@@ -41,9 +41,10 @@ public class UserController(UserRepository userRepository) : ControllerBase
     [HttpGet]
     [Route("list")]
     [Authorize(Roles = RoleType.User)]
-    public ActionResult<IEnumerable<UserDto>> GetAllUser()
+    public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUser()
     {
-        return Ok(userRepository.GetAllUser());
+        var userList = await userRepository.GetAllUser();
+        return Ok(userList);
     }
 
     [HttpGet]
@@ -60,5 +61,18 @@ public class UserController(UserRepository userRepository) : ControllerBase
     public async Task<IEnumerable<UserDto>> GetUserPage([FromQuery] int number, [FromQuery] int size)
     {
         return await userRepository.GetUserPage(number, size);
+    }
+
+    [HttpDelete]
+    [Route("batch")]
+    [Authorize(Roles = RoleType.Admin)]
+    public async Task<IActionResult> DeleteUserBatch([FromBody] List<string> ids)
+    {
+        if (ids.Count == 0)
+        {
+            return BadRequest("请选入要删除的用户列表");
+        }
+        await userRepository.DeleteUserBatch(ids);
+        return Ok();
     }
 }

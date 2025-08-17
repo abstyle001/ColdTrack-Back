@@ -1,6 +1,8 @@
 ﻿using ColdTrack_Back.Datas;
 using ColdTrack_Back.Dtos;
+using ColdTrack_Back.Models;
 using ColdTrack_Back.Utils;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace ColdTrack_Back.Repositories;
@@ -8,8 +10,19 @@ namespace ColdTrack_Back.Repositories;
 /*
  * 用户数据操作
  */
-public class UserRepository(ColdTrackDbContext db, IConfiguration config, IWebHostEnvironment env)
+public class UserRepository(
+    UserManager<AppUser> userManager,
+    ColdTrackDbContext db,
+    IConfiguration config,
+    IWebHostEnvironment env)
 {
+    // 获取所有管理员用户
+    public async Task<HashSet<string>> GetAdminUsers()
+    {
+        var adminUsers = await userManager.GetUsersInRoleAsync(RoleType.Admin);
+        return [..adminUsers.Select(u => u.Id)];
+    }
+    
     public UserDto? GetUserInfo(string id)
     {
         var user = db.Users.Find(id);
@@ -62,9 +75,11 @@ public class UserRepository(ColdTrackDbContext db, IConfiguration config, IWebHo
         };
     }
 
-    public IEnumerable<UserDto> GetAllUser()
+    public async Task<IEnumerable<UserDto>> GetAllUser()
     {
+        var adminIds = await GetAdminUsers();
         return from user in db.Users.ToList()
+            where !adminIds.Contains(user.Id)
             select new UserDto
             {
                 Id = user.Id,
@@ -90,7 +105,9 @@ public class UserRepository(ColdTrackDbContext db, IConfiguration config, IWebHo
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
+        var adminIds = await GetAdminUsers();
         return from user in userList
+            where !adminIds.Contains(user.Id)
             select new UserDto
             {
                 Id = user.Id,
@@ -102,5 +119,14 @@ public class UserRepository(ColdTrackDbContext db, IConfiguration config, IWebHo
                 CreatedAt = user.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"),
                 Avatar = user.Avatar
             };
+    }
+
+    // 批量删除用户（根据传入的用户列表）
+    public async Task DeleteUserBatch(List<string> ids)
+    {
+        await db.Users
+            .Where(u => ids.Contains(u.Id))
+            .ExecuteDeleteAsync();
+        await db.SaveChangesAsync();
     }
 }
