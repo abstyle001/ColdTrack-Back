@@ -71,7 +71,7 @@ public class UserRepository(
             Phone = user.PhoneNumber ?? string.Empty,
             City = user.City ?? string.Empty,
             CreatedAt = user.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"),
-            Avatar = avatarUrl ?? string.Empty
+            Avatar = user.Avatar
         };
     }
 
