@@ -10,7 +10,7 @@ public class PositionDepartment
     [Key]
     public long Id { get; set; }
     [Required]
-    public string PositionId { get; set; }
+    public long PositionId { get; set; }
     [Required]
     public string DepartmentId { get; set; }
 }

@@ -124,6 +124,10 @@ public class UserRepository(
     // 批量删除用户（根据传入的用户列表）
     public async Task DeleteUserBatch(List<string> ids)
     {
+        // 清理用户-职位关联，避免孤儿数据
+        await db.UserPositions
+            .Where(up => ids.Contains(up.UserId))
+            .ExecuteDeleteAsync();
         await db.Users
             .Where(u => ids.Contains(u.Id))
             .ExecuteDeleteAsync();

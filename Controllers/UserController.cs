@@ -9,7 +9,9 @@ namespace ColdTrack_Back.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class UserController(UserRepository userRepository) : ControllerBase
+public class UserController(
+    UserRepository userRepository,
+    UserPositionRepository userPositionRepository) : ControllerBase
 {
     [HttpGet]
     [Route("{id}")]
@@ -74,5 +76,49 @@ public class UserController(UserRepository userRepository) : ControllerBase
         }
         await userRepository.DeleteUserBatch(ids);
         return Ok();
+    }
+
+    // ===== 用户-职位关联 =====
+
+    [HttpPost]
+    [Route("userposition")]
+    [Authorize(Roles = RoleType.Admin)]
+    public async Task<ActionResult> AssignUserPosition([FromBody] AssignUserPositionDto dto)
+    {
+        var record = await userPositionRepository.Assign(dto.UserId, dto.PositionId);
+        if (record == null)
+        {
+            return BadRequest("用户或职位不存在，或关联已存在");
+        }
+        return Ok(record);
+    }
+
+    [HttpDelete]
+    [Route("userposition")]
+    [Authorize(Roles = RoleType.Admin)]
+    public async Task<ActionResult> RemoveUserPosition([FromBody] AssignUserPositionDto dto)
+    {
+        var ok = await userPositionRepository.Remove(dto.UserId, dto.PositionId);
+        if (!ok)
+        {
+            return BadRequest("关联不存在");
+        }
+        return Ok();
+    }
+
+    [HttpGet]
+    [Route("userposition/user/{userId}")]
+    [Authorize(Roles = RoleType.User)]
+    public async Task<ActionResult<List<UserPositionViewDto>>> GetUserPositions([FromRoute] string userId)
+    {
+        return Ok(await userPositionRepository.GetUserPositionsWithDepartments(userId));
+    }
+
+    [HttpGet]
+    [Route("userposition/position/{id:long}/users")]
+    [Authorize(Roles = RoleType.User)]
+    public async Task<ActionResult<IEnumerable<UserDto>>> GetUsersByPosition([FromRoute] long id)
+    {
+        return Ok(await userPositionRepository.GetUsersByPosition(id));
     }
 }

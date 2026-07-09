@@ -12,5 +12,5 @@ public class UserPosition
     [Required]
     public string UserId { get; set; }
     [Required]
-    public string PositionId { get; set; }
+    public long PositionId { get; set; }
 }
