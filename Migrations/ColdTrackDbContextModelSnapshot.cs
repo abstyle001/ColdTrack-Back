@@ -101,21 +101,21 @@ namespace ColdTrack_Back.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "8a016a79-e64b-4fe7-8522-b3fbbf6978dc",
+                            Id = "de4d5418-88ef-4d01-80a4-dfc971ae3d47",
                             AccessFailedCount = 0,
                             City = "北京市",
-                            ConcurrencyStamp = "7a27ae8e-b1ea-4c4c-a1e7-3dcc0f8fa975",
-                            CreatedAt = new DateTime(2025, 8, 6, 21, 9, 27, 14, DateTimeKind.Utc).AddTicks(1245),
+                            ConcurrencyStamp = "1dbe8e32-024a-4d48-9423-000b22811b2f",
+                            CreatedAt = new DateTime(2026, 4, 28, 16, 14, 18, 972, DateTimeKind.Utc).AddTicks(5242),
                             Email = "admin@cold.com",
                             EmailConfirmed = false,
                             LockoutEnabled = true,
                             NickName = "Admin",
                             NormalizedEmail = "ADMIN@COLD.COM",
                             NormalizedUserName = "ADMIN@COLD.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEN9BTE2hnLufpWx/Msi6TbLkJHB20J/BQy+eGbhlf9o79ZTB5TxKtI3OITHYh9YS9g==",
+                            PasswordHash = "AQAAAAIAAYagAAAAELUl/KphdKnCALf14U8IuxYFjhP9bK0HguKM2DlGh5bT/RGf17rpOiH4f7FnpzidgA==",
                             PhoneNumber = "17323895436",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "8c15bcb9-c3e2-45f8-8b8d-49a2dbb138a5",
+                            SecurityStamp = "c25b3ec0-5b13-4e4a-8238-05a87542ada6",
                             TwoFactorEnabled = false,
                             UserName = "admin@cold.com"
                         });
@@ -286,13 +286,13 @@ namespace ColdTrack_Back.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "f0874ebd-be74-4a5e-951a-c738f27f6cb8",
+                            Id = "417355cb-7f8b-4628-b6c9-c34af297ea67",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "7d06dcab-5a11-482e-b015-cf5f6569d5a3",
+                            Id = "a96a582b-2ab9-4528-8d45-b3a78f552e0f",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -387,8 +387,8 @@ namespace ColdTrack_Back.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = "8a016a79-e64b-4fe7-8522-b3fbbf6978dc",
-                            RoleId = "f0874ebd-be74-4a5e-951a-c738f27f6cb8"
+                            UserId = "de4d5418-88ef-4d01-80a4-dfc971ae3d47",
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67"
                         });
                 });
 

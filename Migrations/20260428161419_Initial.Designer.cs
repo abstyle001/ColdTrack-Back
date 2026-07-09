@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ColdTrack_Back.Migrations
 {
     [DbContext(typeof(ColdTrackDbContext))]
-    [Migration("20250805211019_Init")]
-    partial class Init
+    [Migration("20260428161419_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -104,21 +104,21 @@ namespace ColdTrack_Back.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "87573c09-63d8-4cb8-8966-b2bc21b5a5a4",
+                            Id = "de4d5418-88ef-4d01-80a4-dfc971ae3d47",
                             AccessFailedCount = 0,
                             City = "北京市",
-                            ConcurrencyStamp = "f94d1c78-8881-4026-9fcc-130025b74a4b",
-                            CreatedAt = new DateTime(2025, 8, 5, 21, 10, 18, 841, DateTimeKind.Utc).AddTicks(8138),
+                            ConcurrencyStamp = "1dbe8e32-024a-4d48-9423-000b22811b2f",
+                            CreatedAt = new DateTime(2026, 4, 28, 16, 14, 18, 972, DateTimeKind.Utc).AddTicks(5242),
                             Email = "admin@cold.com",
                             EmailConfirmed = false,
                             LockoutEnabled = true,
                             NickName = "Admin",
                             NormalizedEmail = "ADMIN@COLD.COM",
                             NormalizedUserName = "ADMIN@COLD.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEN74YQF5HOAj5SVttYLhbOeDBK7FFl4o1f87sLmUneGOyII15AN/w6bOGdE09Ti/7A==",
+                            PasswordHash = "AQAAAAIAAYagAAAAELUl/KphdKnCALf14U8IuxYFjhP9bK0HguKM2DlGh5bT/RGf17rpOiH4f7FnpzidgA==",
                             PhoneNumber = "17323895436",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "05234f67-fc84-4b1c-8e67-8e4675719da5",
+                            SecurityStamp = "c25b3ec0-5b13-4e4a-8238-05a87542ada6",
                             TwoFactorEnabled = false,
                             UserName = "admin@cold.com"
                         });
@@ -143,6 +143,10 @@ namespace ColdTrack_Back.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ManagerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MaxSeq")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -171,9 +175,8 @@ namespace ColdTrack_Back.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("ChildId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("ChildId")
+                        .HasColumnType("int");
 
                     b.Property<string>("ParentId")
                         .IsRequired()
@@ -286,13 +289,13 @@ namespace ColdTrack_Back.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "457192a0-541a-40cf-aae2-aaff4f3ed601",
+                            Id = "417355cb-7f8b-4628-b6c9-c34af297ea67",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "a3d3433f-ca1c-49f7-aaab-964c977eab82",
+                            Id = "a96a582b-2ab9-4528-8d45-b3a78f552e0f",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -387,8 +390,8 @@ namespace ColdTrack_Back.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = "87573c09-63d8-4cb8-8966-b2bc21b5a5a4",
-                            RoleId = "457192a0-541a-40cf-aae2-aaff4f3ed601"
+                            UserId = "de4d5418-88ef-4d01-80a4-dfc971ae3d47",
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67"
                         });
                 });
 

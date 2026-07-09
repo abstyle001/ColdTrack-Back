@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ColdTrack_Back.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -63,6 +63,7 @@ namespace ColdTrack_Back.Migrations
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ParentId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MaxSeq = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Level = table.Column<int>(type: "int", nullable: false),
                     Explain = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ManagerId = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -82,7 +83,7 @@ namespace ColdTrack_Back.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ParentId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ChildId = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    ChildId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -245,19 +246,19 @@ namespace ColdTrack_Back.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "457192a0-541a-40cf-aae2-aaff4f3ed601", null, "Admin", "ADMIN" },
-                    { "a3d3433f-ca1c-49f7-aaab-964c977eab82", null, "User", "USER" }
+                    { "417355cb-7f8b-4628-b6c9-c34af297ea67", null, "Admin", "ADMIN" },
+                    { "a96a582b-2ab9-4528-8d45-b3a78f552e0f", null, "User", "USER" }
                 });
 
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "AccessFailedCount", "Avatar", "City", "ConcurrencyStamp", "CreatedAt", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "NickName", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { "87573c09-63d8-4cb8-8966-b2bc21b5a5a4", 0, null, "北京市", "f94d1c78-8881-4026-9fcc-130025b74a4b", new DateTime(2025, 8, 5, 21, 10, 18, 841, DateTimeKind.Utc).AddTicks(8138), "admin@cold.com", false, true, null, "Admin", "ADMIN@COLD.COM", "ADMIN@COLD.COM", "AQAAAAIAAYagAAAAEN74YQF5HOAj5SVttYLhbOeDBK7FFl4o1f87sLmUneGOyII15AN/w6bOGdE09Ti/7A==", "17323895436", false, "05234f67-fc84-4b1c-8e67-8e4675719da5", false, "admin@cold.com" });
+                values: new object[] { "de4d5418-88ef-4d01-80a4-dfc971ae3d47", 0, null, "北京市", "1dbe8e32-024a-4d48-9423-000b22811b2f", new DateTime(2026, 4, 28, 16, 14, 18, 972, DateTimeKind.Utc).AddTicks(5242), "admin@cold.com", false, true, null, "Admin", "ADMIN@COLD.COM", "ADMIN@COLD.COM", "AQAAAAIAAYagAAAAELUl/KphdKnCALf14U8IuxYFjhP9bK0HguKM2DlGh5bT/RGf17rpOiH4f7FnpzidgA==", "17323895436", false, "c25b3ec0-5b13-4e4a-8238-05a87542ada6", false, "admin@cold.com" });
 
             migrationBuilder.InsertData(
                 table: "AspNetUserRoles",
                 columns: new[] { "RoleId", "UserId" },
-                values: new object[] { "457192a0-541a-40cf-aae2-aaff4f3ed601", "87573c09-63d8-4cb8-8966-b2bc21b5a5a4" });
+                values: new object[] { "417355cb-7f8b-4628-b6c9-c34af297ea67", "de4d5418-88ef-4d01-80a4-dfc971ae3d47" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
