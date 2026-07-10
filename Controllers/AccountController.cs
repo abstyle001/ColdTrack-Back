@@ -24,7 +24,7 @@ public class AccountController(
 {
     [HttpPost("register")]
     [RequestSizeLimit(10_000_000)]
-    // [Authorize(Roles = RoleType.Admin)]
+    [Authorize(Roles = RoleType.Admin)]
     public async Task<IActionResult> Register([FromForm] RegisterUserDto dto)
     {
         try
