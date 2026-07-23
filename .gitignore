@@ -3,8 +3,7 @@ bin/
 obj/
 .vs/
 *.user
-Statics/
+Statics/*
 appsettings.Development.json
 appsettings.json
-Statics
 !Statics/.gitkeep
