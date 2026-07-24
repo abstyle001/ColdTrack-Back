@@ -6,3 +6,4 @@ obj/
 Statics/
 appsettings.Development.json
 appsettings.json
+/doc/

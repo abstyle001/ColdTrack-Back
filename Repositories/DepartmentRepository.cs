@@ -158,6 +158,45 @@ public class DepartmentRepository(ColdTrackDbContext db)
             .ToListAsync();
     }
 
+    // 获取部门（分页，按一级部门分页：每页 number 个顶级部门，并带出其全部子孙）
+    public async Task<List<DepartmentDto>> GetPage(int number, int size)
+    {
+        var roots = (await GetTree()).ToList();
+        var pageRoots = roots.Skip((number - 1) * size).Take(size).ToList();
+        var result = new List<DepartmentDto>();
+        void Flatten(DepartmentTreeDto node)
+        {
+            result.Add(new DepartmentDto
+            {
+                Id = node.Id,
+                Name = node.Name,
+                ParentId = node.ParentId,
+                Level = node.Level,
+                Explain = node.Explain,
+                ManagerId = node.ManagerId,
+                ManagerName = node.ManagerName,
+                Workspace = node.Workspace,
+                Addition = node.Addition,
+                CreatedAt = node.CreatedAt,
+            });
+            foreach (var child in node.Children)
+            {
+                Flatten(child);
+            }
+        }
+        foreach (var root in pageRoots)
+        {
+            Flatten(root);
+        }
+        return result;
+    }
+
+    // 顶级部门数量（分页总数以此为准，不含子孙）
+    public async Task<int> GetTopLevelCount()
+    {
+        return (await GetTree()).Count();
+    }
+
     // 获取单个部门详情（含负责人昵称）
     public async Task<DepartmentDto?> GetById(string id)
     {
@@ -201,7 +240,7 @@ public class DepartmentRepository(ColdTrackDbContext db)
         var roots = new List<DepartmentTreeDto>();
         foreach (var node in dict.Values)
         {
-            if (dict.TryGetValue(node.ParentId, out var parent))
+            if (!node.ParentId.Equals(node.Id) && dict.TryGetValue(node.ParentId, out var parent))
             {
                 parent.Children.Add(node);
             }

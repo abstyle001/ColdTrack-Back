@@ -18,6 +18,21 @@ public class PositionRepository(ColdTrackDbContext db)
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<PositionDto>> GetPage(int number, int size)
+    {
+        return await db.Positions
+            .OrderBy(p => p.CreatedAt)
+            .Skip((number - 1) * size)
+            .Take(size)
+            .Select(p => ToDto(p))
+            .ToListAsync();
+    }
+
+    public int GetCount()
+    {
+        return db.Positions.Count();
+    }
+
     public async Task<PositionDto?> GetById(long id)
     {
         var position = await db.Positions.FindAsync(id);

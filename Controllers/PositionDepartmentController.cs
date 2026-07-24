@@ -1,3 +1,4 @@
+using ColdTrack_Back.Authorization;
 using ColdTrack_Back.Dtos;
 using ColdTrack_Back.Repositories;
 using ColdTrack_Back.Utils;
@@ -11,7 +12,7 @@ namespace ColdTrack_Back.Controllers;
 public class PositionDepartmentController(PositionDepartmentRepository positionDepartmentRepository) : ControllerBase
 {
     [HttpPost]
-    [Authorize(Roles = RoleType.Admin)]
+    [HasPermission(Permissions.PositionUpdate)]
     public async Task<ActionResult> Assign([FromBody] AssignPositionDepartmentDto dto)
     {
         var record = await positionDepartmentRepository.Assign(dto.PositionId, dto.DepartmentId);
@@ -24,7 +25,7 @@ public class PositionDepartmentController(PositionDepartmentRepository positionD
     }
 
     [HttpDelete]
-    [Authorize(Roles = RoleType.Admin)]
+    [HasPermission(Permissions.PositionUpdate)]
     public async Task<ActionResult> Remove([FromBody] AssignPositionDepartmentDto dto)
     {
         var ok = await positionDepartmentRepository.Remove(dto.PositionId, dto.DepartmentId);
@@ -38,7 +39,7 @@ public class PositionDepartmentController(PositionDepartmentRepository positionD
 
     [HttpGet]
     [Route("position/{id:long}/departments")]
-    [Authorize(Roles = RoleType.User)]
+    [HasPermission(Permissions.PositionRead)]
     public async Task<ActionResult<IEnumerable<DepartmentDto>>> GetDepartmentsByPosition([FromRoute] long id)
     {
         return Ok(await positionDepartmentRepository.GetDepartmentsByPosition(id));
@@ -46,7 +47,7 @@ public class PositionDepartmentController(PositionDepartmentRepository positionD
 
     [HttpGet]
     [Route("department/{id}/positions")]
-    [Authorize(Roles = RoleType.User)]
+    [HasPermission(Permissions.PositionRead)]
     public async Task<ActionResult<IEnumerable<PositionDto>>> GetPositionsByDepartment([FromRoute] string id)
     {
         return Ok(await positionDepartmentRepository.GetPositionsByDepartment(id));

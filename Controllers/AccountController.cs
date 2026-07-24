@@ -1,9 +1,12 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using ColdTrack_Back.Authorization;
 using ColdTrack_Back.Datas;
 using ColdTrack_Back.Dtos;
 using ColdTrack_Back.Models;
 using ColdTrack_Back.Services;
+using ColdTrack_Back.Utils;
+using Microsoft.AspNetCore.Identity;
 using ColdTrack_Back.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -20,11 +23,12 @@ public class AccountController(
     SignInManager<AppUser> signInManager,
     TokenService tokenService,
     IConfiguration config,
-    IWebHostEnvironment env) : ControllerBase
+    IWebHostEnvironment env,
+    IPermissionCacheService permissionCache) : ControllerBase
 {
     [HttpPost("register")]
     [RequestSizeLimit(10_000_000)]
-    [Authorize(Roles = RoleType.Admin)]
+    [HasPermission(Permissions.UserCreate)]
     public async Task<IActionResult> Register([FromForm] RegisterUserDto dto)
     {
         try
@@ -54,8 +58,6 @@ public class AccountController(
             var createUser = await userManager.CreateAsync(appUser, dto.Password);
             if (createUser.Succeeded)
             {
-                var roleResult = await userManager.AddToRoleAsync(appUser, "User");
-                if (!roleResult.Succeeded) return StatusCode(500, roleResult.Errors);
                 var roles = await userManager.GetRolesAsync(appUser);
                 var avatar = await AvatarUtil.UploadAvatar(appUser.Id, dto.File, config, env);
                 appUser.Avatar = avatar;
@@ -106,19 +108,28 @@ public class AccountController(
 
     [HttpGet]
     [Route("me")]
-    [Authorize(Roles = RoleType.User)]
-    public ActionResult<TokenClaim> GetProfile()
+    [HasPermission(Permissions.UserRead)]
+    public async Task<ActionResult<TokenClaim>> GetProfile()
     {
-        var id = User.FindFirstValue("id");
+        var id = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("id");
         var email = User.FindFirstValue(JwtRegisteredClaimNames.Email);
         var userName = User.FindFirstValue(JwtRegisteredClaimNames.Name);
         var role = User.FindFirstValue(ClaimTypes.Role);
+
+        var roles = await db.UserRoles
+            .Where(ur => ur.UserId == id)
+            .Join(db.Roles, ur => ur.RoleId, r => r.Id, (_, r) => r.Name!)
+            .ToListAsync();
+        var permissions = await permissionCache.GetPermissionsAsync(id ?? string.Empty);
+
         return Ok(new TokenClaim
         {
             Id = id ?? string.Empty,
             Email = email ?? string.Empty,
             UserName = userName ?? string.Empty,
-            Role = role ?? string.Empty
+            Role = role ?? string.Empty,
+            Roles = roles,
+            Permissions = permissions.ToList()
         });
     }
 }

@@ -1,4 +1,5 @@
-﻿using ColdTrack_Back.Dtos;
+﻿using ColdTrack_Back.Authorization;
+using ColdTrack_Back.Dtos;
 using ColdTrack_Back.Models;
 using ColdTrack_Back.Repositories;
 using ColdTrack_Back.Utils;
@@ -15,7 +16,7 @@ public class UserController(
 {
     [HttpGet]
     [Route("{id}")]
-    [Authorize(Roles = RoleType.User)]
+    [HasPermission(Permissions.UserRead)]
     public ActionResult<AppUser> GetUser([FromRoute] string id)
     {
         var userDto = userRepository.GetUserInfo(id);
@@ -29,7 +30,7 @@ public class UserController(
     [HttpPut]
     [Route("{id}")]
     [RequestSizeLimit(10_000_000)]
-    [Authorize(Roles = RoleType.User)]
+    [HasPermission(Permissions.UserUpdate)]
     public async Task<ActionResult<UserDto>> UpdateUser([FromRoute] string id, [FromForm] UpdateUserDto dto)
     {
         var userDto = await userRepository.UpdateUser(id, dto);
@@ -42,7 +43,7 @@ public class UserController(
 
     [HttpGet]
     [Route("list")]
-    [Authorize(Roles = RoleType.User)]
+    [HasPermission(Permissions.UserRead)]
     public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUser()
     {
         var userList = await userRepository.GetAllUser();
@@ -51,7 +52,7 @@ public class UserController(
 
     [HttpGet]
     [Route("count")]
-    [Authorize(Roles = RoleType.User)]
+    [HasPermission(Permissions.UserRead)]
     public ActionResult<long> GetUserCount()
     {
         return Ok(userRepository.GetUserCount());
@@ -59,7 +60,7 @@ public class UserController(
 
     [HttpGet]
     [Route("page")]
-    [Authorize(Roles = RoleType.User)]
+    [HasPermission(Permissions.UserRead)]
     public async Task<IEnumerable<UserDto>> GetUserPage([FromQuery] int number, [FromQuery] int size)
     {
         return await userRepository.GetUserPage(number, size);
@@ -67,7 +68,7 @@ public class UserController(
 
     [HttpDelete]
     [Route("batch")]
-    [Authorize(Roles = RoleType.Admin)]
+    [HasPermission(Permissions.UserDelete)]
     public async Task<IActionResult> DeleteUserBatch([FromBody] List<string> ids)
     {
         if (ids.Count == 0)
@@ -82,7 +83,7 @@ public class UserController(
 
     [HttpPost]
     [Route("userposition")]
-    [Authorize(Roles = RoleType.Admin)]
+    [HasPermission(Permissions.UserAssign)]
     public async Task<ActionResult> AssignUserPosition([FromBody] AssignUserPositionDto dto)
     {
         var record = await userPositionRepository.Assign(dto.UserId, dto.PositionId);
@@ -95,7 +96,7 @@ public class UserController(
 
     [HttpDelete]
     [Route("userposition")]
-    [Authorize(Roles = RoleType.Admin)]
+    [HasPermission(Permissions.UserAssign)]
     public async Task<ActionResult> RemoveUserPosition([FromBody] AssignUserPositionDto dto)
     {
         var ok = await userPositionRepository.Remove(dto.UserId, dto.PositionId);
@@ -108,7 +109,7 @@ public class UserController(
 
     [HttpGet]
     [Route("userposition/user/{userId}")]
-    [Authorize(Roles = RoleType.User)]
+    [HasPermission(Permissions.UserRead)]
     public async Task<ActionResult<List<UserPositionViewDto>>> GetUserPositions([FromRoute] string userId)
     {
         return Ok(await userPositionRepository.GetUserPositionsWithDepartments(userId));
@@ -116,7 +117,7 @@ public class UserController(
 
     [HttpGet]
     [Route("userposition/position/{id:long}/users")]
-    [Authorize(Roles = RoleType.User)]
+    [HasPermission(Permissions.UserRead)]
     public async Task<ActionResult<IEnumerable<UserDto>>> GetUsersByPosition([FromRoute] long id)
     {
         return Ok(await userPositionRepository.GetUsersByPosition(id));

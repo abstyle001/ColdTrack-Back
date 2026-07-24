@@ -4,6 +4,7 @@ using ColdTrack_Back.Datas;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ColdTrack_Back.Migrations
 {
     [DbContext(typeof(ColdTrackDbContext))]
-    partial class ColdTrackDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260712150149_RoleAndPermissions")]
+    partial class RoleAndPermissions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

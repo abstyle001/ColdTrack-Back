@@ -1,3 +1,4 @@
+using ColdTrack_Back.Authorization;
 using ColdTrack_Back.Dtos;
 using ColdTrack_Back.Repositories;
 using ColdTrack_Back.Utils;
@@ -11,7 +12,7 @@ namespace ColdTrack_Back.Controllers;
 public class PositionController(PositionRepository positionRepository) : ControllerBase
 {
     [HttpGet]
-    [Authorize(Roles = RoleType.User)]
+    [HasPermission(Permissions.PositionRead)]
     public async Task<ActionResult<IEnumerable<PositionDto>>> GetAll()
     {
         return Ok(await positionRepository.GetAll());
@@ -19,7 +20,7 @@ public class PositionController(PositionRepository positionRepository) : Control
 
     [HttpGet]
     [Route("{id:long}")]
-    [Authorize(Roles = RoleType.User)]
+    [HasPermission(Permissions.PositionRead)]
     public async Task<ActionResult<PositionDto>> GetById([FromRoute] long id)
     {
         var position = await positionRepository.GetById(id);
@@ -31,8 +32,24 @@ public class PositionController(PositionRepository positionRepository) : Control
         return Ok(position);
     }
 
+    [HttpGet]
+    [Route("page")]
+    [HasPermission(Permissions.PositionRead)]
+    public async Task<ActionResult<IEnumerable<PositionDto>>> GetPositionPage([FromQuery] int number, [FromQuery] int size)
+    {
+        return Ok(await positionRepository.GetPage(number, size));
+    }
+
+    [HttpGet]
+    [Route("count")]
+    [HasPermission(Permissions.PositionRead)]
+    public ActionResult<long> GetPositionCount()
+    {
+        return Ok(positionRepository.GetCount());
+    }
+
     [HttpPost]
-    [Authorize(Roles = RoleType.Admin)]
+    [HasPermission(Permissions.PositionCreate)]
     public async Task<ActionResult<PositionDto>> Create([FromBody] CreatePositionDto dto)
     {
         var position = await positionRepository.Create(dto);
@@ -41,7 +58,7 @@ public class PositionController(PositionRepository positionRepository) : Control
 
     [HttpPut]
     [Route("{id:long}")]
-    [Authorize(Roles = RoleType.Admin)]
+    [HasPermission(Permissions.PositionUpdate)]
     public async Task<ActionResult<PositionDto>> Update([FromRoute] long id, [FromBody] UpdatePositionDto dto)
     {
         var position = await positionRepository.Update(id, dto);
@@ -55,7 +72,7 @@ public class PositionController(PositionRepository positionRepository) : Control
 
     [HttpDelete]
     [Route("{id:long}")]
-    [Authorize(Roles = RoleType.Admin)]
+    [HasPermission(Permissions.PositionDelete)]
     public async Task<ActionResult> Delete([FromRoute] long id)
     {
         var ok = await positionRepository.Delete(id);

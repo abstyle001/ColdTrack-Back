@@ -1,4 +1,5 @@
-﻿using ColdTrack_Back.Dtos;
+﻿using ColdTrack_Back.Authorization;
+using ColdTrack_Back.Dtos;
 using ColdTrack_Back.Repositories;
 using ColdTrack_Back.Utils;
 using Microsoft.AspNetCore.Authorization;
@@ -11,7 +12,7 @@ namespace ColdTrack_Back.Controllers;
 public class DepartmentController(DepartmentRepository departmentRepository) : ControllerBase
 {
     [HttpPost]
-    [Authorize(Roles = RoleType.Admin)]
+    [HasPermission(Permissions.DepartmentCreate)]
     public async Task<ActionResult<DepartmentDto>> CreateDepartment([FromBody] CreateDepartmentDto dto)
     {
         if (dto.ParentId != null && !dto.ParentId.Equals(string.Empty))
@@ -32,7 +33,7 @@ public class DepartmentController(DepartmentRepository departmentRepository) : C
 
     [HttpDelete]
     [Route("{id}")]
-    [Authorize(Roles = RoleType.Admin)]
+    [HasPermission(Permissions.DepartmentDelete)]
     public async Task<ActionResult<DepartmentDto>> DeleteDepartment([FromRoute] string id)
     {
         var department = await departmentRepository.DeleteDepartment(id);
@@ -45,15 +46,31 @@ public class DepartmentController(DepartmentRepository departmentRepository) : C
     }
 
     [HttpGet]
-    [Authorize(Roles = RoleType.User)]
+    [HasPermission(Permissions.DepartmentRead)]
     public async Task<ActionResult<IEnumerable<DepartmentDto>>> GetAllDepartments()
     {
         return Ok(await departmentRepository.GetAll());
     }
 
     [HttpGet]
+    [Route("page")]
+    [HasPermission(Permissions.DepartmentRead)]
+    public async Task<ActionResult<IEnumerable<DepartmentDto>>> GetDepartmentPage([FromQuery] int number, [FromQuery] int size)
+    {
+        return Ok(await departmentRepository.GetPage(number, size));
+    }
+
+    [HttpGet]
+    [Route("count")]
+    [HasPermission(Permissions.DepartmentRead)]
+    public async Task<ActionResult<long>> GetDepartmentCount()
+    {
+        return Ok(await departmentRepository.GetTopLevelCount());
+    }
+
+    [HttpGet]
     [Route("tree")]
-    [Authorize(Roles = RoleType.User)]
+    [HasPermission(Permissions.DepartmentRead)]
     public async Task<ActionResult<IEnumerable<DepartmentTreeDto>>> GetDepartmentTree()
     {
         return Ok(await departmentRepository.GetTree());
@@ -61,7 +78,7 @@ public class DepartmentController(DepartmentRepository departmentRepository) : C
 
     [HttpGet]
     [Route("{id}")]
-    [Authorize(Roles = RoleType.User)]
+    [HasPermission(Permissions.DepartmentRead)]
     public async Task<ActionResult<DepartmentDto>> GetDepartment([FromRoute] string id)
     {
         var department = await departmentRepository.GetById(id);
@@ -75,7 +92,7 @@ public class DepartmentController(DepartmentRepository departmentRepository) : C
 
     [HttpPut]
     [Route("{id}")]
-    [Authorize(Roles = RoleType.Admin)]
+    [HasPermission(Permissions.DepartmentUpdate)]
     public async Task<ActionResult<DepartmentDto>> UpdateDepartment([FromRoute] string id, [FromBody] DepartmentDto dto)
     {
         var department = await departmentRepository.Update(id, dto);

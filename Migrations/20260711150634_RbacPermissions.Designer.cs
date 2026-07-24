@@ -4,6 +4,7 @@ using ColdTrack_Back.Datas;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ColdTrack_Back.Migrations
 {
     [DbContext(typeof(ColdTrackDbContext))]
-    partial class ColdTrackDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260711150634_RbacPermissions")]
+    partial class RbacPermissions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -196,7 +199,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 1L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(478),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5395),
                             Group = "用户管理",
                             Key = "user.read",
                             Name = "用户查看"
@@ -204,7 +207,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 2L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(482),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5409),
                             Group = "用户管理",
                             Key = "user.create",
                             Name = "用户创建"
@@ -212,7 +215,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 3L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(483),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5412),
                             Group = "用户管理",
                             Key = "user.update",
                             Name = "用户编辑"
@@ -220,7 +223,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 4L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(484),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5414),
                             Group = "用户管理",
                             Key = "user.delete",
                             Name = "用户删除"
@@ -228,7 +231,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 5L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(485),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5416),
                             Group = "用户管理",
                             Key = "user.assign",
                             Name = "用户分配职位"
@@ -236,7 +239,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 6L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(488),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5421),
                             Group = "部门管理",
                             Key = "department.read",
                             Name = "部门查看"
@@ -244,7 +247,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 7L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(489),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5423),
                             Group = "部门管理",
                             Key = "department.create",
                             Name = "部门创建"
@@ -252,7 +255,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 8L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(513),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5425),
                             Group = "部门管理",
                             Key = "department.update",
                             Name = "部门编辑"
@@ -260,7 +263,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 9L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(514),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5427),
                             Group = "部门管理",
                             Key = "department.delete",
                             Name = "部门删除"
@@ -268,7 +271,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 10L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(516),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5430),
                             Group = "职位管理",
                             Key = "position.read",
                             Name = "职位查看"
@@ -276,7 +279,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 11L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(517),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5432),
                             Group = "职位管理",
                             Key = "position.create",
                             Name = "职位创建"
@@ -284,7 +287,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 12L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(518),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5434),
                             Group = "职位管理",
                             Key = "position.update",
                             Name = "职位编辑"
@@ -292,7 +295,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 13L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(519),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5436),
                             Group = "职位管理",
                             Key = "position.delete",
                             Name = "职位删除"
@@ -300,7 +303,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 14L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(520),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5438),
                             Group = "任务管理",
                             Key = "task.read",
                             Name = "任务查看"
@@ -308,7 +311,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 15L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(520),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5439),
                             Group = "任务管理",
                             Key = "task.create",
                             Name = "任务创建"
@@ -316,7 +319,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 16L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(521),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5441),
                             Group = "任务管理",
                             Key = "task.update",
                             Name = "任务编辑"
@@ -324,7 +327,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 17L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(522),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5443),
                             Group = "任务管理",
                             Key = "task.delete",
                             Name = "任务删除"
@@ -332,7 +335,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 18L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(524),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5447),
                             Group = "系统设置",
                             Key = "role.manage",
                             Name = "角色与权限管理"
