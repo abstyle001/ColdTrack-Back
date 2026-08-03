@@ -15,6 +15,7 @@ public class ColdTrackDbContext(DbContextOptions<ColdTrackDbContext> options) : 
     public DbSet<DiscardDepartment> DiscardDepartments { get; set; }
     public DbSet<Permission> Permissions { get; set; }
     public DbSet<RolePermission> RolePermissions { get; set; }
+    public DbSet<TaskItem> TaskItems { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -24,6 +25,23 @@ public class ColdTrackDbContext(DbContextOptions<ColdTrackDbContext> options) : 
         const string roleUserId = "7d06dcab-5a11-482e-b015-cf5f6569d5a3";
 
         builder.Entity<RolePermission>().HasKey(rp => new { rp.RoleId, rp.PermissionId });
+
+        builder.Entity<TaskItem>(entity =>
+        {
+            entity.HasOne(t => t.Assignee)
+                  .WithMany()
+                  .HasForeignKey(t => t.AssigneeId)
+                  .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasOne(t => t.Creator)
+                  .WithMany()
+                  .HasForeignKey(t => t.CreatorId)
+                  .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasIndex(t => t.AssigneeId);
+            entity.HasIndex(t => t.CreatorId);
+            entity.HasIndex(t => t.Status);
+        });
 
         // 权限目录种子
         var permissions = new List<Permission>
