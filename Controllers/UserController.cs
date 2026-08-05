@@ -1,4 +1,4 @@
-﻿using ColdTrack_Back.Authorization;
+using ColdTrack_Back.Authorization;
 using ColdTrack_Back.Dtos;
 using ColdTrack_Back.Models;
 using ColdTrack_Back.Repositories;
@@ -53,6 +53,15 @@ public class UserController(
     [HttpGet]
     [Route("count")]
     [HasPermission(Permissions.UserRead)]
+
+    [HttpGet]
+    [Route("brief")]
+    [HasPermission(Permissions.UserRead)]
+    public async Task<ActionResult<List<UserBriefDto>>> GetUserBrief([FromQuery] bool includeAdmin = false)
+    {
+        var list = await userRepository.GetUserBriefAsync(includeAdmin);
+        return Ok(list);
+    }
     public ActionResult<long> GetUserCount()
     {
         return Ok(userRepository.GetUserCount());
