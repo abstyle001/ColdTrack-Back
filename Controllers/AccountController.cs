@@ -7,9 +7,6 @@ using ColdTrack_Back.Models;
 using ColdTrack_Back.Services;
 using ColdTrack_Back.Utils;
 using Microsoft.AspNetCore.Identity;
-using ColdTrack_Back.Utils;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

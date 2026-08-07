@@ -17,7 +17,7 @@ public class UserController(
     [HttpGet]
     [Route("{id}")]
     [HasPermission(Permissions.UserRead)]
-    public ActionResult<AppUser> GetUser([FromRoute] string id)
+    public ActionResult<UserDto> GetUser([FromRoute] string id)
     {
         var userDto = userRepository.GetUserInfo(id);
         if (userDto == null)
@@ -53,6 +53,10 @@ public class UserController(
     [HttpGet]
     [Route("count")]
     [HasPermission(Permissions.UserRead)]
+    public ActionResult<long> GetUserCount()
+    {
+        return Ok(userRepository.GetUserCount());
+    }
 
     [HttpGet]
     [Route("brief")]
@@ -61,10 +65,6 @@ public class UserController(
     {
         var list = await userRepository.GetUserBriefAsync(includeAdmin);
         return Ok(list);
-    }
-    public ActionResult<long> GetUserCount()
-    {
-        return Ok(userRepository.GetUserCount());
     }
 
     [HttpGet]
