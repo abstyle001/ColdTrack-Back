@@ -43,13 +43,15 @@ public class TaskRepository(ColdTrackDbContext db)
             .ToListAsync();
     }
 
-    public int GetCount(string? status = null, string? priority = null)
+    public int GetCount(string? status = null, string? priority = null, string? assigneeId = null)
     {
         var query = db.TaskItems.AsQueryable();
         if (!string.IsNullOrEmpty(status) && Enum.TryParse<TaskItem.StatusValue>(status, out var s))
             query = query.Where(t => t.Status == s);
         if (!string.IsNullOrEmpty(priority) && Enum.TryParse<TaskItem.PriorityValue>(priority, out var p))
             query = query.Where(t => t.Priority == p);
+        if (!string.IsNullOrEmpty(assigneeId))
+            query = query.Where(t => t.AssigneeId == assigneeId);
         return query.Count();
     }
 
