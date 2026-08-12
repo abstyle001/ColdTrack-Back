@@ -127,6 +127,30 @@ public class TaskRepository(ColdTrackDbContext db)
         return await GetById(id);
     }
 
+    public async Task<TaskStatsDto> GetStats(string userId, bool isAdmin)
+    {
+        var now = DateTime.UtcNow;
+        var query = db.TaskItems.AsQueryable();
+        if (!isAdmin)
+            query = query.Where(t => t.AssigneeId == userId);
+
+        return new TaskStatsDto
+        {
+            Total = await query.CountAsync(),
+            TodoCount = await query.CountAsync(t => t.Status == TaskItem.StatusValue.Todo),
+            InProgressCount = await query.CountAsync(t => t.Status == TaskItem.StatusValue.InProgress),
+            ReviewCount = await query.CountAsync(t => t.Status == TaskItem.StatusValue.Review),
+            CompletedCount = await query.CountAsync(t => t.Status == TaskItem.StatusValue.Completed),
+            OverdueCount = await query.CountAsync(t =>
+                t.Status != TaskItem.StatusValue.Completed
+                && t.Deadline.HasValue
+                && t.Deadline.Value < now),
+            MyTaskCount = await query.CountAsync(t =>
+                t.AssigneeId == userId
+                && t.Status != TaskItem.StatusValue.Completed),
+        };
+    }
+
     private static TaskDto ToDto(TaskItem t) => new()
     {
         Id = t.Id,

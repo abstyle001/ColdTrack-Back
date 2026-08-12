@@ -124,4 +124,16 @@ public class TaskController(TaskRepository taskRepository) : ControllerBase
             return BadRequest("任务不存在");
         return Ok(task);
     }
+    [HttpGet]
+    [Route("stats")]
+    [HasPermission(Permissions.TaskRead)]
+    public async Task<ActionResult<TaskStatsDto>> GetStats()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                     ?? User.FindFirstValue("sub")
+                     ?? User.FindFirstValue("id") ?? "";
+        var isAdmin = User.IsInRole("Admin");
+        return Ok(await taskRepository.GetStats(userId, isAdmin));
+    }
+
 }
