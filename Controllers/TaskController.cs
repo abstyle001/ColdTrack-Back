@@ -25,7 +25,7 @@ public class TaskController(TaskRepository taskRepository) : ControllerBase
     {
         var task = await taskRepository.GetById(id);
         if (task == null)
-            return NotFound("ä»»åŠ¡ä¸å­˜åœ¨");
+            return NotFound("ÈÎÎñ²»´æÔÚ");
         return Ok(task);
     }
 
@@ -71,7 +71,7 @@ public class TaskController(TaskRepository taskRepository) : ControllerBase
                         ?? User.FindFirstValue("sub")
                         ?? User.FindFirstValue("id");
         if (string.IsNullOrEmpty(creatorId))
-            return Unauthorized("æ— æ³•è·å–ç”¨æˆ·èº«ä»½");
+            return Unauthorized("ÎŞ·¨»ñÈ¡ÓÃ»§Éí·İ");
         var task = await taskRepository.Create(dto, creatorId);
         return Ok(task);
     }
@@ -83,7 +83,7 @@ public class TaskController(TaskRepository taskRepository) : ControllerBase
     {
         var task = await taskRepository.Update(id, dto);
         if (task == null)
-            return BadRequest("ä»»åŠ¡ä¸å­˜åœ¨");
+            return BadRequest("ÈÎÎñ²»´æÔÚ");
         return Ok(task);
     }
 
@@ -94,7 +94,7 @@ public class TaskController(TaskRepository taskRepository) : ControllerBase
     {
         var ok = await taskRepository.Delete(id);
         if (!ok)
-            return BadRequest("ä»»åŠ¡ä¸å­˜åœ¨");
+            return BadRequest("ÈÎÎñ²»´æÔÚ");
         return Ok();
     }
 
@@ -105,5 +105,18 @@ public class TaskController(TaskRepository taskRepository) : ControllerBase
     {
         await taskRepository.DeleteBatch(ids);
         return Ok();
+    }
+
+    [HttpPatch]
+    [Route("{id:long}/status")]
+    [HasPermission(Permissions.TaskUpdate)]
+    public async Task<ActionResult<TaskDto>> UpdateStatus(
+        [FromRoute] long id,
+        [FromBody] UpdateTaskStatusDto dto)
+    {
+        var task = await taskRepository.UpdateStatus(id, dto.Status);
+        if (task == null)
+            return BadRequest("ÈÎÎñ²»´æÔÚ");
+        return Ok(task);
     }
 }

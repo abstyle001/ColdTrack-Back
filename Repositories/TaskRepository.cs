@@ -111,6 +111,19 @@ public class TaskRepository(ColdTrackDbContext db)
         return true;
     }
 
+    public async Task<TaskDto?> UpdateStatus(long id, string status)
+    {
+        var task = await db.TaskItems.FindAsync(id);
+        if (task == null) return null;
+        if (Enum.TryParse<TaskItem.StatusValue>(status, out var s))
+        {
+            task.Status = s;
+            task.UpdatedAt = DateTime.UtcNow;
+            await db.SaveChangesAsync();
+        }
+        return await GetById(id);
+    }
+
     private static TaskDto ToDto(TaskItem t) => new()
     {
         Id = t.Id,
