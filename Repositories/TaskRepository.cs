@@ -1,4 +1,4 @@
-using ColdTrack_Back.Datas;
+﻿using ColdTrack_Back.Datas;
 using ColdTrack_Back.Dtos;
 using ColdTrack_Back.Models;
 using Microsoft.EntityFrameworkCore;
@@ -7,9 +7,12 @@ namespace ColdTrack_Back.Repositories;
 
 public class TaskRepository(ColdTrackDbContext db)
 {
-    public async Task<IEnumerable<TaskDto>> GetAll()
+    public async Task<IEnumerable<TaskDto>> GetAll(string? assigneeId = null)
     {
-        return await db.TaskItems
+        var query = db.TaskItems.AsQueryable();
+        if (!string.IsNullOrEmpty(assigneeId))
+            query = query.Where(t => t.AssigneeId == assigneeId);
+        return await query
             .OrderByDescending(t => t.CreatedAt)
             .Select(t => ToDto(t))
             .ToListAsync();

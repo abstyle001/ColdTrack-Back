@@ -1,4 +1,4 @@
-using System.Security.Claims;
+ï»¿using System.Security.Claims;
 using ColdTrack_Back.Authorization;
 using ColdTrack_Back.Dtos;
 using ColdTrack_Back.Repositories;
@@ -13,9 +13,14 @@ public class TaskController(TaskRepository taskRepository) : ControllerBase
 {
     [HttpGet]
     [HasPermission(Permissions.TaskRead)]
-    public async Task<ActionResult<IEnumerable<TaskDto>>> GetAll()
+    public async Task<ActionResult<IEnumerable<TaskDto>>> GetAll(
+        [FromQuery] string? assigneeId = null)
     {
-        return Ok(await taskRepository.GetAll());
+        if (!User.IsInRole("Admin"))
+            assigneeId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                         ?? User.FindFirstValue("sub")
+                         ?? User.FindFirstValue("id");
+        return Ok(await taskRepository.GetAll(assigneeId));
     }
 
     [HttpGet]
@@ -25,7 +30,7 @@ public class TaskController(TaskRepository taskRepository) : ControllerBase
     {
         var task = await taskRepository.GetById(id);
         if (task == null)
-            return NotFound("ÈÎÎñ²»´æÔÚ");
+            return NotFound("ä»»åŠ¡ä¸å­˜åœ¨");
         return Ok(task);
     }
 
@@ -71,7 +76,7 @@ public class TaskController(TaskRepository taskRepository) : ControllerBase
                         ?? User.FindFirstValue("sub")
                         ?? User.FindFirstValue("id");
         if (string.IsNullOrEmpty(creatorId))
-            return Unauthorized("ÎŞ·¨»ñÈ¡ÓÃ»§Éí·İ");
+            return Unauthorized("æ— æ³•è·å–ç”¨æˆ·èº«ä»½");
         var task = await taskRepository.Create(dto, creatorId);
         return Ok(task);
     }
@@ -83,7 +88,7 @@ public class TaskController(TaskRepository taskRepository) : ControllerBase
     {
         var task = await taskRepository.Update(id, dto);
         if (task == null)
-            return BadRequest("ÈÎÎñ²»´æÔÚ");
+            return BadRequest("ä»»åŠ¡ä¸å­˜åœ¨");
         return Ok(task);
     }
 
@@ -94,7 +99,7 @@ public class TaskController(TaskRepository taskRepository) : ControllerBase
     {
         var ok = await taskRepository.Delete(id);
         if (!ok)
-            return BadRequest("ÈÎÎñ²»´æÔÚ");
+            return BadRequest("ä»»åŠ¡ä¸å­˜åœ¨");
         return Ok();
     }
 
@@ -116,7 +121,7 @@ public class TaskController(TaskRepository taskRepository) : ControllerBase
     {
         var task = await taskRepository.UpdateStatus(id, dto.Status);
         if (task == null)
-            return BadRequest("ÈÎÎñ²»´æÔÚ");
+            return BadRequest("ä»»åŠ¡ä¸å­˜åœ¨");
         return Ok(task);
     }
 }
