@@ -119,11 +119,35 @@ public class TaskController(TaskRepository taskRepository) : ControllerBase
         [FromRoute] long id,
         [FromBody] UpdateTaskStatusDto dto)
     {
-        var task = await taskRepository.UpdateStatus(id, dto.Status);
+        var assigneeId = User.IsInRole("Admin")
+            ? null
+            : User.FindFirstValue(ClaimTypes.NameIdentifier)
+              ?? User.FindFirstValue("sub")
+              ?? User.FindFirstValue("id");
+        var task = await taskRepository.UpdateStatus(id, dto.Status, assigneeId);
         if (task == null)
             return BadRequest("任务不存在");
         return Ok(task);
     }
+
+    [HttpPatch]
+    [Route("batch/status")]
+    [HasPermission(Permissions.TaskUpdate)]
+    public async Task<ActionResult<IEnumerable<TaskDto>>> UpdateStatusBatch(
+        [FromBody] BatchUpdateStatusDto dto)
+    {
+        var assigneeId = User.IsInRole("Admin")
+            ? null
+            : User.FindFirstValue(ClaimTypes.NameIdentifier)
+              ?? User.FindFirstValue("sub")
+              ?? User.FindFirstValue("id");
+        var tasks = await taskRepository.UpdateStatusBatch(
+            dto.Ids,
+            dto.Status,
+            assigneeId);
+        return Ok(tasks);
+    }
+
     [HttpGet]
     [Route("stats")]
     [HasPermission(Permissions.TaskRead)]

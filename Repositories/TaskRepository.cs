@@ -114,9 +114,12 @@ public class TaskRepository(ColdTrackDbContext db)
         return true;
     }
 
-    public async Task<TaskDto?> UpdateStatus(long id, string status)
+    public async Task<TaskDto?> UpdateStatus(long id, string status, string? assigneeId = null)
     {
-        var task = await db.TaskItems.FindAsync(id);
+        var query = db.TaskItems.Where(t => t.Id == id);
+        if (!string.IsNullOrEmpty(assigneeId))
+            query = query.Where(t => t.AssigneeId == assigneeId);
+        var task = await query.FirstOrDefaultAsync();
         if (task == null) return null;
         if (Enum.TryParse<TaskItem.StatusValue>(status, out var s))
         {
@@ -125,6 +128,29 @@ public class TaskRepository(ColdTrackDbContext db)
             await db.SaveChangesAsync();
         }
         return await GetById(id);
+    }
+
+    public async Task<List<TaskDto>> UpdateStatusBatch(
+        List<long> ids,
+        string status,
+        string? assigneeId = null)
+    {
+        if (ids == null || ids.Count == 0 ||
+            !Enum.TryParse<TaskItem.StatusValue>(status, out var targetStatus))
+            return new List<TaskDto>();
+
+        var query = db.TaskItems.Where(t => ids.Contains(t.Id));
+        if (!string.IsNullOrEmpty(assigneeId))
+            query = query.Where(t => t.AssigneeId == assigneeId);
+
+        var tasks = await query.ToListAsync();
+        foreach (var task in tasks)
+        {
+            task.Status = targetStatus;
+            task.UpdatedAt = DateTime.UtcNow;
+        }
+        await db.SaveChangesAsync();
+        return tasks.Select(ToDto).ToList();
     }
 
     public async Task<TaskStatsDto> GetStats(string userId, bool isAdmin)
