@@ -53,7 +53,7 @@ public class DepartmentRepository(ColdTrackDbContext db)
                 if (departments.Count == 0) seq = "00";
                 else
                 {
-                    var maxId = departments.Max(d => 
+                    var maxId = departments.Max(d =>
                         FeelTheBaseUtil.ThirtyHexadecimalToDecimal(d.Id));
                     seq = FeelTheBaseUtil.DecimalToThirtyHexadecimal(maxId + 1);
                 }
@@ -86,18 +86,7 @@ public class DepartmentRepository(ColdTrackDbContext db)
         // 插入新生成部门
         await db.Departments.AddAsync(record);
         await db.SaveChangesAsync();
-        return new DepartmentDto
-        {
-            Id = record.Id,
-            Name = record.Name,
-            ParentId = record.ParentId,
-            Level = record.Level,
-            Explain = record.Explain,
-            ManagerId = record.ManagerId,
-            Workspace = record.Workspace,
-            Addition = record.Addition,
-            CreatedAt = record.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")
-        };
+        return await GetById(record.Id);
     }
 
     public async Task<DepartmentDto?> DeleteDepartment(string id)
@@ -145,7 +134,135 @@ public class DepartmentRepository(ColdTrackDbContext db)
 
     public async Task<bool> ExistsDepartment(string id)
     {
+        return await db.Departments.AnyAsync(d => d.Id == id);
+    }
+
+    // 获取全部部门（扁平，含负责人昵称）
+    public async Task<IEnumerable<DepartmentDto>> GetAll()
+    {
+        return await db.Departments
+            .OrderBy(d => d.Id)
+            .Select(d => new DepartmentDto
+            {
+                Id = d.Id,
+                Name = d.Name,
+                ParentId = d.ParentId,
+                Level = d.Level,
+                Explain = d.Explain,
+                ManagerId = d.ManagerId,
+                ManagerName = db.Users.Where(u => u.Id == d.ManagerId).Select(u => u.NickName).FirstOrDefault(),
+                Workspace = d.Workspace,
+                Addition = d.Addition,
+                CreatedAt = d.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")
+            })
+            .ToListAsync();
+    }
+
+    // 获取部门（分页，按一级部门分页：每页 number 个顶级部门，并带出其全部子孙）
+    public async Task<List<DepartmentDto>> GetPage(int number, int size)
+    {
+        var roots = (await GetTree()).ToList();
+        var pageRoots = roots.Skip((number - 1) * size).Take(size).ToList();
+        var result = new List<DepartmentDto>();
+        void Flatten(DepartmentTreeDto node)
+        {
+            result.Add(new DepartmentDto
+            {
+                Id = node.Id,
+                Name = node.Name,
+                ParentId = node.ParentId,
+                Level = node.Level,
+                Explain = node.Explain,
+                ManagerId = node.ManagerId,
+                ManagerName = node.ManagerName,
+                Workspace = node.Workspace,
+                Addition = node.Addition,
+                CreatedAt = node.CreatedAt,
+            });
+            foreach (var child in node.Children)
+            {
+                Flatten(child);
+            }
+        }
+        foreach (var root in pageRoots)
+        {
+            Flatten(root);
+        }
+        return result;
+    }
+
+    // 顶级部门数量（分页总数以此为准，不含子孙）
+    public async Task<int> GetTopLevelCount()
+    {
+        return (await GetTree()).Count();
+    }
+
+    // 获取单个部门详情（含负责人昵称）
+    public async Task<DepartmentDto?> GetById(string id)
+    {
         var department = await db.Departments.FindAsync(id);
-        return department != null;
+        if (department == null) return null;
+        return new DepartmentDto
+        {
+            Id = department.Id,
+            Name = department.Name,
+            ParentId = department.ParentId,
+            Level = department.Level,
+            Explain = department.Explain,
+            ManagerId = department.ManagerId,
+            ManagerName = await db.Users
+                .Where(u => u.Id == department.ManagerId)
+                .Select(u => u.NickName)
+                .FirstOrDefaultAsync(),
+            Workspace = department.Workspace,
+            Addition = department.Addition,
+            CreatedAt = department.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")
+        };
+    }
+
+    // 获取部门树（层级结构）
+    public async Task<IEnumerable<DepartmentTreeDto>> GetTree()
+    {
+        var all = await GetAll();
+        var dict = all.ToDictionary(d => d.Id, d => new DepartmentTreeDto
+        {
+            Id = d.Id,
+            Name = d.Name,
+            ParentId = d.ParentId,
+            Level = d.Level,
+            Explain = d.Explain,
+            ManagerId = d.ManagerId,
+            ManagerName = d.ManagerName,
+            Workspace = d.Workspace,
+            Addition = d.Addition,
+            CreatedAt = d.CreatedAt
+        });
+        var roots = new List<DepartmentTreeDto>();
+        foreach (var node in dict.Values)
+        {
+            if (!node.ParentId.Equals(node.Id) && dict.TryGetValue(node.ParentId, out var parent))
+            {
+                parent.Children.Add(node);
+            }
+            else
+            {
+                roots.Add(node);
+            }
+        }
+        return roots;
+    }
+
+    // 更新部门
+    public async Task<DepartmentDto?> Update(string id, DepartmentDto dto)
+    {
+        var department = await db.Departments.FindAsync(id);
+        if (department == null) return null;
+        department.Name = dto.Name;
+        department.Explain = dto.Explain;
+        department.Workspace = dto.Workspace;
+        department.ManagerId = dto.ManagerId ?? string.Empty;
+        department.Addition = dto.Addition;
+        await db.SaveChangesAsync();
+        return await GetById(id);
     }
 }

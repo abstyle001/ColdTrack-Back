@@ -1,5 +1,7 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using ColdTrack_Back.Authorization;
 using ColdTrack_Back.Datas;
 using ColdTrack_Back.Models;
 using ColdTrack_Back.Repositories;
@@ -8,16 +10,22 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
+using ColdTrack_Back.Conventions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options => { options.Conventions.Add(new FromServicesPrimaryConstructorConvention()); });
 builder.Services.AddDbContext<ColdTrackDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddAuthorization();
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<IPermissionService, PermissionService>();
+builder.Services.AddScoped<IPermissionCacheService, PermissionCacheService>();
+builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
 builder.Services.AddIdentity<AppUser, IdentityRole>()
     .AddEntityFrameworkStores<ColdTrackDbContext>()
     .AddDefaultTokenProviders();
@@ -52,6 +60,7 @@ builder.Services.AddScoped<PositionRepository>();
 builder.Services.AddScoped<DepartmentRepository>();
 builder.Services.AddScoped<UserPositionRepository>();
 builder.Services.AddScoped<PositionDepartmentRepository>();
+builder.Services.AddScoped<TaskRepository>();
 builder.Services.AddScoped<TokenService>();
 
 var app = builder.Build();

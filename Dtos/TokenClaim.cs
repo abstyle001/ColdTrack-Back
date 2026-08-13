@@ -1,4 +1,6 @@
-﻿namespace ColdTrack_Back.Dtos;
+﻿using ColdTrack_Back.Services;
+
+namespace ColdTrack_Back.Dtos;
 
 public class TokenClaim
 {
@@ -6,4 +8,6 @@ public class TokenClaim
     public string Email { get; set; } = string.Empty;
     public string UserName { get; set; } = string.Empty;
     public string Role { get; set; } = string.Empty;
+    public List<string> Roles { get; set; } = new();
+    public List<string> Permissions { get; set; } = new();
 }

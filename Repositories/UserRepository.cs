@@ -1,4 +1,4 @@
-﻿using ColdTrack_Back.Datas;
+using ColdTrack_Back.Datas;
 using ColdTrack_Back.Dtos;
 using ColdTrack_Back.Models;
 using ColdTrack_Back.Utils;
@@ -121,9 +121,72 @@ public class UserRepository(
             };
     }
 
+
+    /// <summary>
+    /// 获取用户简要列表（含部门/职位上下文），供权限管理穿梭面板使用。
+    /// </summary>
+    public async Task<List<UserBriefDto>> GetUserBriefAsync(bool includeAdmin = false)
+    {
+        var allUsers = await db.Users.ToListAsync();
+
+        HashSet<string> adminIds = new();
+        if (!includeAdmin)
+        {
+            adminIds = await GetAdminUsers();
+        }
+
+        var users = allUsers.Where(u => includeAdmin || !adminIds.Contains(u.Id)).ToList();
+        var userIds = users.Select(u => u.Id).ToList();
+
+        var userPositions = await db.UserPositions
+            .Where(up => userIds.Contains(up.UserId))
+            .ToListAsync();
+        var positionIds = userPositions.Select(up => up.PositionId).Distinct().ToList();
+
+        var positions = await db.Positions
+            .Where(p => positionIds.Contains(p.Id))
+            .ToDictionaryAsync(p => p.Id, p => p.Name);
+
+        var posDepts = await db.PositionDepartments
+            .Where(pd => positionIds.Contains(pd.PositionId))
+            .ToListAsync();
+        var deptIds = posDepts.Select(pd => pd.DepartmentId).Distinct().ToList();
+
+        var departments = await db.Departments
+            .Where(d => deptIds.Contains(d.Id))
+            .ToDictionaryAsync(d => d.Id, d => d.Name);
+
+        var userDeptMap = new Dictionary<string, HashSet<string>>();
+        var userPosMap = new Dictionary<string, HashSet<string>>();
+        var posDeptLookup = posDepts
+            .GroupBy(pd => pd.PositionId)
+            .ToDictionary(g => g.Key, g => g.Select(pd => pd.DepartmentId).ToList());
+
+        foreach (var up in userPositions)
+        {
+            if (positions.TryGetValue(up.PositionId, out var posName))
+            {
+                if (!userPosMap.ContainsKey(up.UserId)) userPosMap[up.UserId] = new();
+                userPosMap[up.UserId].Add(posName);
+            }
+            if (posDeptLookup.TryGetValue(up.PositionId, out var deptIdList))
+            {
+                if (!userDeptMap.ContainsKey(up.UserId)) userDeptMap[up.UserId] = new();
+                foreach (var deptId in deptIdList)
+                    if (departments.TryGetValue(deptId, out var deptName))
+                        userDeptMap[up.UserId].Add(deptName);
+            }
+        }
+
+        return users.Select(u => new UserBriefDto { Id = u.Id, UserName = u.UserName ?? string.Empty, Email = u.Email ?? string.Empty, NickName = u.NickName ?? string.Empty, Avatar = u.Avatar, DepartmentNames = userDeptMap.TryGetValue(u.Id, out var dns) ? dns.ToList() : new(), PositionNames = userPosMap.TryGetValue(u.Id, out var pns) ? pns.ToList() : new() }).ToList();
+    }
     // 批量删除用户（根据传入的用户列表）
     public async Task DeleteUserBatch(List<string> ids)
     {
+        // 清理用户-职位关联，避免孤儿数据
+        await db.UserPositions
+            .Where(up => ids.Contains(up.UserId))
+            .ExecuteDeleteAsync();
         await db.Users
             .Where(u => ids.Contains(u.Id))
             .ExecuteDeleteAsync();

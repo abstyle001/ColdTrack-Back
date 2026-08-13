@@ -4,6 +4,7 @@ using ColdTrack_Back.Datas;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ColdTrack_Back.Migrations
 {
     [DbContext(typeof(ColdTrackDbContext))]
-    partial class ColdTrackDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260711150634_RbacPermissions")]
+    partial class RbacPermissions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -196,7 +199,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 1L,
-                            CreatedAt = new DateTime(2026, 8, 3, 16, 2, 14, 995, DateTimeKind.Utc).AddTicks(7093),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5395),
                             Group = "用户管理",
                             Key = "user.read",
                             Name = "用户查看"
@@ -204,7 +207,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 2L,
-                            CreatedAt = new DateTime(2026, 8, 3, 16, 2, 14, 995, DateTimeKind.Utc).AddTicks(7101),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5409),
                             Group = "用户管理",
                             Key = "user.create",
                             Name = "用户创建"
@@ -212,7 +215,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 3L,
-                            CreatedAt = new DateTime(2026, 8, 3, 16, 2, 14, 995, DateTimeKind.Utc).AddTicks(7103),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5412),
                             Group = "用户管理",
                             Key = "user.update",
                             Name = "用户编辑"
@@ -220,7 +223,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 4L,
-                            CreatedAt = new DateTime(2026, 8, 3, 16, 2, 14, 995, DateTimeKind.Utc).AddTicks(7104),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5414),
                             Group = "用户管理",
                             Key = "user.delete",
                             Name = "用户删除"
@@ -228,7 +231,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 5L,
-                            CreatedAt = new DateTime(2026, 8, 3, 16, 2, 14, 995, DateTimeKind.Utc).AddTicks(7106),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5416),
                             Group = "用户管理",
                             Key = "user.assign",
                             Name = "用户分配职位"
@@ -236,7 +239,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 6L,
-                            CreatedAt = new DateTime(2026, 8, 3, 16, 2, 14, 995, DateTimeKind.Utc).AddTicks(7109),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5421),
                             Group = "部门管理",
                             Key = "department.read",
                             Name = "部门查看"
@@ -244,7 +247,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 7L,
-                            CreatedAt = new DateTime(2026, 8, 3, 16, 2, 14, 995, DateTimeKind.Utc).AddTicks(7110),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5423),
                             Group = "部门管理",
                             Key = "department.create",
                             Name = "部门创建"
@@ -252,7 +255,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 8L,
-                            CreatedAt = new DateTime(2026, 8, 3, 16, 2, 14, 995, DateTimeKind.Utc).AddTicks(7112),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5425),
                             Group = "部门管理",
                             Key = "department.update",
                             Name = "部门编辑"
@@ -260,7 +263,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 9L,
-                            CreatedAt = new DateTime(2026, 8, 3, 16, 2, 14, 995, DateTimeKind.Utc).AddTicks(7113),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5427),
                             Group = "部门管理",
                             Key = "department.delete",
                             Name = "部门删除"
@@ -268,7 +271,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 10L,
-                            CreatedAt = new DateTime(2026, 8, 3, 16, 2, 14, 995, DateTimeKind.Utc).AddTicks(7115),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5430),
                             Group = "职位管理",
                             Key = "position.read",
                             Name = "职位查看"
@@ -276,7 +279,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 11L,
-                            CreatedAt = new DateTime(2026, 8, 3, 16, 2, 14, 995, DateTimeKind.Utc).AddTicks(7116),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5432),
                             Group = "职位管理",
                             Key = "position.create",
                             Name = "职位创建"
@@ -284,7 +287,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 12L,
-                            CreatedAt = new DateTime(2026, 8, 3, 16, 2, 14, 995, DateTimeKind.Utc).AddTicks(7117),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5434),
                             Group = "职位管理",
                             Key = "position.update",
                             Name = "职位编辑"
@@ -292,7 +295,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 13L,
-                            CreatedAt = new DateTime(2026, 8, 3, 16, 2, 14, 995, DateTimeKind.Utc).AddTicks(7118),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5436),
                             Group = "职位管理",
                             Key = "position.delete",
                             Name = "职位删除"
@@ -300,7 +303,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 14L,
-                            CreatedAt = new DateTime(2026, 8, 3, 16, 2, 14, 995, DateTimeKind.Utc).AddTicks(7120),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5438),
                             Group = "任务管理",
                             Key = "task.read",
                             Name = "任务查看"
@@ -308,7 +311,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 15L,
-                            CreatedAt = new DateTime(2026, 8, 3, 16, 2, 14, 995, DateTimeKind.Utc).AddTicks(7122),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5439),
                             Group = "任务管理",
                             Key = "task.create",
                             Name = "任务创建"
@@ -316,7 +319,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 16L,
-                            CreatedAt = new DateTime(2026, 8, 3, 16, 2, 14, 995, DateTimeKind.Utc).AddTicks(7124),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5441),
                             Group = "任务管理",
                             Key = "task.update",
                             Name = "任务编辑"
@@ -324,7 +327,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 17L,
-                            CreatedAt = new DateTime(2026, 8, 3, 16, 2, 14, 995, DateTimeKind.Utc).AddTicks(7126),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5443),
                             Group = "任务管理",
                             Key = "task.delete",
                             Name = "任务删除"
@@ -332,7 +335,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 18L,
-                            CreatedAt = new DateTime(2026, 8, 3, 16, 2, 14, 995, DateTimeKind.Utc).AddTicks(7128),
+                            CreatedAt = new DateTime(2026, 7, 11, 15, 6, 34, 128, DateTimeKind.Utc).AddTicks(5447),
                             Group = "系统设置",
                             Key = "role.manage",
                             Name = "角色与权限管理"
@@ -405,167 +408,119 @@ namespace ColdTrack_Back.Migrations
                     b.HasData(
                         new
                         {
-                            RoleId = "f0874ebd-be74-4a5e-951a-c738f27f6cb8",
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67",
                             PermissionId = 1L
                         },
                         new
                         {
-                            RoleId = "f0874ebd-be74-4a5e-951a-c738f27f6cb8",
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67",
                             PermissionId = 2L
                         },
                         new
                         {
-                            RoleId = "f0874ebd-be74-4a5e-951a-c738f27f6cb8",
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67",
                             PermissionId = 3L
                         },
                         new
                         {
-                            RoleId = "f0874ebd-be74-4a5e-951a-c738f27f6cb8",
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67",
                             PermissionId = 4L
                         },
                         new
                         {
-                            RoleId = "f0874ebd-be74-4a5e-951a-c738f27f6cb8",
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67",
                             PermissionId = 5L
                         },
                         new
                         {
-                            RoleId = "f0874ebd-be74-4a5e-951a-c738f27f6cb8",
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67",
                             PermissionId = 6L
                         },
                         new
                         {
-                            RoleId = "f0874ebd-be74-4a5e-951a-c738f27f6cb8",
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67",
                             PermissionId = 7L
                         },
                         new
                         {
-                            RoleId = "f0874ebd-be74-4a5e-951a-c738f27f6cb8",
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67",
                             PermissionId = 8L
                         },
                         new
                         {
-                            RoleId = "f0874ebd-be74-4a5e-951a-c738f27f6cb8",
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67",
                             PermissionId = 9L
                         },
                         new
                         {
-                            RoleId = "f0874ebd-be74-4a5e-951a-c738f27f6cb8",
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67",
                             PermissionId = 10L
                         },
                         new
                         {
-                            RoleId = "f0874ebd-be74-4a5e-951a-c738f27f6cb8",
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67",
                             PermissionId = 11L
                         },
                         new
                         {
-                            RoleId = "f0874ebd-be74-4a5e-951a-c738f27f6cb8",
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67",
                             PermissionId = 12L
                         },
                         new
                         {
-                            RoleId = "f0874ebd-be74-4a5e-951a-c738f27f6cb8",
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67",
                             PermissionId = 13L
                         },
                         new
                         {
-                            RoleId = "f0874ebd-be74-4a5e-951a-c738f27f6cb8",
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67",
                             PermissionId = 14L
                         },
                         new
                         {
-                            RoleId = "f0874ebd-be74-4a5e-951a-c738f27f6cb8",
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67",
                             PermissionId = 15L
                         },
                         new
                         {
-                            RoleId = "f0874ebd-be74-4a5e-951a-c738f27f6cb8",
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67",
                             PermissionId = 16L
                         },
                         new
                         {
-                            RoleId = "f0874ebd-be74-4a5e-951a-c738f27f6cb8",
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67",
                             PermissionId = 17L
                         },
                         new
                         {
-                            RoleId = "f0874ebd-be74-4a5e-951a-c738f27f6cb8",
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67",
                             PermissionId = 18L
                         },
                         new
                         {
-                            RoleId = "7d06dcab-5a11-482e-b015-cf5f6569d5a3",
+                            RoleId = "a96a582b-2ab9-4528-8d45-b3a78f552e0f",
                             PermissionId = 1L
                         },
                         new
                         {
-                            RoleId = "7d06dcab-5a11-482e-b015-cf5f6569d5a3",
+                            RoleId = "a96a582b-2ab9-4528-8d45-b3a78f552e0f",
                             PermissionId = 3L
                         },
                         new
                         {
-                            RoleId = "7d06dcab-5a11-482e-b015-cf5f6569d5a3",
+                            RoleId = "a96a582b-2ab9-4528-8d45-b3a78f552e0f",
                             PermissionId = 6L
                         },
                         new
                         {
-                            RoleId = "7d06dcab-5a11-482e-b015-cf5f6569d5a3",
+                            RoleId = "a96a582b-2ab9-4528-8d45-b3a78f552e0f",
                             PermissionId = 10L
                         },
                         new
                         {
-                            RoleId = "7d06dcab-5a11-482e-b015-cf5f6569d5a3",
+                            RoleId = "a96a582b-2ab9-4528-8d45-b3a78f552e0f",
                             PermissionId = 14L
                         });
-                });
-
-            modelBuilder.Entity("ColdTrack_Back.Models.TaskItem", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("AssigneeId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatorId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime?>("Deadline")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Priority")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AssigneeId");
-
-                    b.HasIndex("CreatorId");
-
-                    b.HasIndex("Status");
-
-                    b.ToTable("Tasks");
                 });
 
             modelBuilder.Entity("ColdTrack_Back.Models.UserPosition", b =>
@@ -719,24 +674,6 @@ namespace ColdTrack_Back.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("ColdTrack_Back.Models.TaskItem", b =>
-                {
-                    b.HasOne("ColdTrack_Back.Models.AppUser", "Assignee")
-                        .WithMany()
-                        .HasForeignKey("AssigneeId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("ColdTrack_Back.Models.AppUser", "Creator")
-                        .WithMany()
-                        .HasForeignKey("CreatorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Assignee");
-
-                    b.Navigation("Creator");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
