@@ -29,6 +29,7 @@ public static class Permissions
     public const string TaskCreate = "task.create";
     public const string TaskUpdate = "task.update";
     public const string TaskDelete = "task.delete";
+    public const string TaskComment = "task.comment";
 
     // 系统设置：角色与权限管理
     public const string RoleManage = "role.manage";

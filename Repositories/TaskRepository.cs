@@ -1,4 +1,4 @@
-﻿using ColdTrack_Back.Datas;
+using ColdTrack_Back.Datas;
 using ColdTrack_Back.Dtos;
 using ColdTrack_Back.Models;
 using Microsoft.EntityFrameworkCore;
@@ -114,6 +114,44 @@ public class TaskRepository(ColdTrackDbContext db)
         return true;
     }
 
+    public async Task<bool> TaskExists(long id)
+    {
+        return await db.TaskItems.AnyAsync(t => t.Id == id);
+    }
+
+    public async Task<List<TaskCommentDto>> GetComments(long taskId)
+    {
+        var comments = await db.TaskComments
+            .AsNoTracking()
+            .Include(c => c.Author)
+            .Where(c => c.TaskId == taskId)
+            .OrderBy(c => c.CreatedAt)
+            .ToListAsync();
+        return comments.Select(ToCommentDto).ToList();
+    }
+
+    public async Task<TaskCommentDto?> AddComment(long taskId, string content, string authorId)
+    {
+        var taskExists = await db.TaskItems.AnyAsync(t => t.Id == taskId);
+        if (!taskExists)
+            return null;
+
+        var comment = new TaskComment
+        {
+            TaskId = taskId,
+            AuthorId = authorId,
+            Content = content,
+            CreatedAt = DateTime.UtcNow
+        };
+        await db.TaskComments.AddAsync(comment);
+        await db.SaveChangesAsync();
+
+        var created = await db.TaskComments
+            .Include(c => c.Author)
+            .FirstOrDefaultAsync(c => c.Id == comment.Id);
+        return created == null ? null : ToCommentDto(created);
+    }
+
     public async Task<TaskDto?> UpdateStatus(long id, string status, string? assigneeId = null)
     {
         var query = db.TaskItems.Where(t => t.Id == id);
@@ -176,6 +214,17 @@ public class TaskRepository(ColdTrackDbContext db)
                 && t.Status != TaskItem.StatusValue.Completed),
         };
     }
+
+    private static TaskCommentDto ToCommentDto(TaskComment c) => new()
+    {
+        Id = c.Id,
+        TaskId = c.TaskId,
+        Content = c.Content,
+        AuthorId = c.AuthorId,
+        AuthorName = c.Author != null ? (c.Author.NickName ?? c.Author.UserName ?? "") : null,
+        AuthorAvatar = c.Author != null ? c.Author.Avatar : null,
+        CreatedAt = c.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")
+    };
 
     private static TaskDto ToDto(TaskItem t) => new()
     {

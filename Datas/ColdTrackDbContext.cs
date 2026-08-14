@@ -1,4 +1,4 @@
-﻿using ColdTrack_Back.Models;
+using ColdTrack_Back.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -16,13 +16,16 @@ public class ColdTrackDbContext(DbContextOptions<ColdTrackDbContext> options) : 
     public DbSet<Permission> Permissions { get; set; }
     public DbSet<RolePermission> RolePermissions { get; set; }
     public DbSet<TaskItem> TaskItems { get; set; }
+    public DbSet<TaskComment> TaskComments { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
 
-        // 固定种子 ID，与数据库实际角色 ID 对齐
-        const string roleAdminId = "f0874ebd-be74-4a5e-951a-c738f27f6cb8";
-        const string roleUserId = "7d06dcab-5a11-482e-b015-cf5f6569d5a3";
+        // 数据库实际存在的角色 ID（Initial 迁移创建）：
+        //   Admin = 417355cb-7f8b-4628-b6c9-c34af297ea67
+        //   User  = a96a582b-2ab9-4528-8d45-b3a78f552e0f
+        const string roleAdminId = "417355cb-7f8b-4628-b6c9-c34af297ea67";
+        const string roleUserId = "a96a582b-2ab9-4528-8d45-b3a78f552e0f";
 
         builder.Entity<RolePermission>().HasKey(rp => new { rp.RoleId, rp.PermissionId });
 
@@ -41,6 +44,24 @@ public class ColdTrackDbContext(DbContextOptions<ColdTrackDbContext> options) : 
             entity.HasIndex(t => t.AssigneeId);
             entity.HasIndex(t => t.CreatorId);
             entity.HasIndex(t => t.Status);
+        });
+
+        builder.Entity<TaskComment>(entity =>
+        {
+            // 删除任务时级联删除其评论
+            entity.HasOne(c => c.Task)
+                  .WithMany()
+                  .HasForeignKey(c => c.TaskId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // 删除用户时保留评论，作者置空
+            entity.HasOne(c => c.Author)
+                  .WithMany()
+                  .HasForeignKey(c => c.AuthorId)
+                  .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasIndex(c => c.TaskId);
+            entity.HasIndex(c => c.AuthorId);
         });
 
         // 权限目录种子
@@ -64,6 +85,7 @@ public class ColdTrackDbContext(DbContextOptions<ColdTrackDbContext> options) : 
             new() { Id = 16, Key = Perm.TaskUpdate, Name = "任务编辑", Group = "任务管理" },
             new() { Id = 17, Key = Perm.TaskDelete, Name = "任务删除", Group = "任务管理" },
             new() { Id = 18, Key = Perm.RoleManage, Name = "角色与权限管理", Group = "系统设置" },
+            new() { Id = 19, Key = Perm.TaskComment, Name = "任务评论", Group = "任务管理" },
         };
         builder.Entity<Permission>().HasData(permissions);
 
@@ -73,7 +95,7 @@ public class ColdTrackDbContext(DbContextOptions<ColdTrackDbContext> options) : 
         {
             rolePermissions.Add(new RolePermission { RoleId = roleAdminId, PermissionId = p.Id });
         }
-        foreach (var id in new[] { 1L, 3L, 6L, 10L, 14L })
+        foreach (var id in new[] { 1L, 3L, 6L, 10L, 14L, 19L })
         {
             rolePermissions.Add(new RolePermission { RoleId = roleUserId, PermissionId = id });
         }

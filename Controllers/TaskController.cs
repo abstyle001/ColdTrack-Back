@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using ColdTrack_Back.Authorization;
 using ColdTrack_Back.Dtos;
 using ColdTrack_Back.Repositories;
@@ -146,6 +146,40 @@ public class TaskController(TaskRepository taskRepository) : ControllerBase
             dto.Status,
             assigneeId);
         return Ok(tasks);
+    }
+
+    [HttpGet]
+    [Route("{id:long}/comments")]
+    [HasPermission(Permissions.TaskRead)]
+    public async Task<ActionResult<IEnumerable<TaskCommentDto>>> GetComments([FromRoute] long id)
+    {
+        if (!await taskRepository.TaskExists(id))
+            return NotFound("任务不存在");
+        return Ok(await taskRepository.GetComments(id));
+    }
+
+    [HttpPost]
+    [Route("{id:long}/comments")]
+    [HasPermission(Permissions.TaskComment)]
+    public async Task<ActionResult<TaskCommentDto>> AddComment(
+        [FromRoute] long id,
+        [FromBody] CreateTaskCommentDto dto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+        if (string.IsNullOrWhiteSpace(dto.Content))
+            return BadRequest("评论内容不能为空");
+
+        var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                       ?? User.FindFirstValue("sub")
+                       ?? User.FindFirstValue("id");
+        if (string.IsNullOrEmpty(authorId))
+            return Unauthorized("无法获取用户身份");
+
+        var comment = await taskRepository.AddComment(id, dto.Content.Trim(), authorId);
+        if (comment == null)
+            return NotFound("任务不存在");
+        return Ok(comment);
     }
 
     [HttpGet]
