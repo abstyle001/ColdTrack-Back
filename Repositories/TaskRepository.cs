@@ -14,6 +14,7 @@ public class TaskRepository(ColdTrackDbContext db)
             query = query.Where(t => t.AssigneeId == assigneeId);
         return await query
             .OrderByDescending(t => t.CreatedAt)
+            .Include(t => t.TaskTags).ThenInclude(tt => tt.Tag)
             .Select(t => ToDto(t))
             .ToListAsync();
     }
@@ -23,11 +24,12 @@ public class TaskRepository(ColdTrackDbContext db)
         var task = await db.TaskItems
             .Include(t => t.Assignee)
             .Include(t => t.Creator)
+            .Include(t => t.TaskTags).ThenInclude(tt => tt.Tag)
             .FirstOrDefaultAsync(t => t.Id == id);
         return task == null ? null : ToDto(task);
     }
 
-    public async Task<IEnumerable<TaskDto>> GetPage(int number, int size, string? status = null, string? priority = null, string? assigneeId = null)
+    public async Task<IEnumerable<TaskDto>> GetPage(int number, int size, string? status = null, string? priority = null, string? assigneeId = null, long? tagId = null)
     {
         var query = db.TaskItems.AsQueryable();
 
@@ -37,16 +39,19 @@ public class TaskRepository(ColdTrackDbContext db)
             query = query.Where(t => t.Priority == p);
         if (!string.IsNullOrEmpty(assigneeId))
             query = query.Where(t => t.AssigneeId == assigneeId);
+        if (tagId.HasValue)
+            query = query.Where(t => t.TaskTags.Any(tt => tt.TagId == tagId.Value));
 
         return await query
             .OrderByDescending(t => t.CreatedAt)
             .Skip((number - 1) * size)
             .Take(size)
+            .Include(t => t.TaskTags).ThenInclude(tt => tt.Tag)
             .Select(t => ToDto(t))
             .ToListAsync();
     }
 
-    public int GetCount(string? status = null, string? priority = null, string? assigneeId = null)
+    public int GetCount(string? status = null, string? priority = null, string? assigneeId = null, long? tagId = null)
     {
         var query = db.TaskItems.AsQueryable();
         if (!string.IsNullOrEmpty(status) && Enum.TryParse<TaskItem.StatusValue>(status, out var s))
@@ -55,6 +60,8 @@ public class TaskRepository(ColdTrackDbContext db)
             query = query.Where(t => t.Priority == p);
         if (!string.IsNullOrEmpty(assigneeId))
             query = query.Where(t => t.AssigneeId == assigneeId);
+        if (tagId.HasValue)
+            query = query.Where(t => t.TaskTags.Any(tt => tt.TagId == tagId.Value));
         return query.Count();
     }
 
@@ -76,13 +83,24 @@ public class TaskRepository(ColdTrackDbContext db)
             UpdatedAt = DateTime.UtcNow
         };
         await db.TaskItems.AddAsync(task);
+
+        if (dto.TagIds != null && dto.TagIds.Count > 0)
+        {
+            var distinct = dto.TagIds.Distinct().ToList();
+            var existing = await db.Tags.Where(t => distinct.Contains(t.Id)).Select(t => t.Id).ToListAsync();
+            foreach (var tagId in existing)
+                task.TaskTags.Add(new TaskTag { TagId = tagId });
+        }
+
         await db.SaveChangesAsync();
         return await GetById(task.Id) ?? throw new InvalidOperationException("Failed to load created task");
     }
 
     public async Task<TaskDto?> Update(long id, UpdateTaskDto dto)
     {
-        var task = await db.TaskItems.FindAsync(id);
+        var task = await db.TaskItems
+            .Include(t => t.TaskTags)
+            .FirstOrDefaultAsync(t => t.Id == id);
         if (task == null) return null;
 
         if (dto.Title != null) task.Title = dto.Title;
@@ -93,6 +111,25 @@ public class TaskRepository(ColdTrackDbContext db)
         if (dto.Priority != null && Enum.TryParse<TaskItem.PriorityValue>(dto.Priority, out var p))
             task.Priority = p;
         if (dto.Deadline != null) task.Deadline = dto.Deadline;
+
+        if (dto.TagIds != null)
+        {
+            var target = dto.TagIds.Distinct().ToList();
+            var current = task.TaskTags.Select(tt => tt.TagId).ToList();
+
+            var toRemove = current.Except(target).ToList();
+            var toAdd = target.Except(current).ToList();
+            var existingIds = await db.Tags.Where(t => toAdd.Contains(t.Id)).Select(t => t.Id).ToListAsync();
+
+            foreach (var tagId in toRemove)
+            {
+                var row = task.TaskTags.First(tt => tt.TagId == tagId);
+                task.TaskTags.Remove(row);
+            }
+            foreach (var tagId in existingIds)
+                task.TaskTags.Add(new TaskTag { TaskId = id, TagId = tagId });
+        }
+
         task.UpdatedAt = DateTime.UtcNow;
 
         await db.SaveChangesAsync();
@@ -181,7 +218,9 @@ public class TaskRepository(ColdTrackDbContext db)
         if (!string.IsNullOrEmpty(assigneeId))
             query = query.Where(t => t.AssigneeId == assigneeId);
 
-        var tasks = await query.ToListAsync();
+        var tasks = await query
+            .Include(t => t.TaskTags).ThenInclude(tt => tt.Tag)
+            .ToListAsync();
         foreach (var task in tasks)
         {
             task.Status = targetStatus;
@@ -226,6 +265,14 @@ public class TaskRepository(ColdTrackDbContext db)
         CreatedAt = c.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")
     };
 
+    private static TagDto ToTagDto(Tag t) => new()
+    {
+        Id = t.Id,
+        Name = t.Name,
+        Color = t.Color,
+        CreatedAt = t.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")
+    };
+
     private static TaskDto ToDto(TaskItem t) => new()
     {
         Id = t.Id,
@@ -239,6 +286,7 @@ public class TaskRepository(ColdTrackDbContext db)
         Priority = t.Priority.ToString(),
         Deadline = t.Deadline.HasValue ? t.Deadline.Value.ToString("yyyy-MM-dd HH:mm:ss") : null,
         CreatedAt = t.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"),
-        UpdatedAt = t.UpdatedAt.ToString("yyyy-MM-dd HH:mm:ss")
+        UpdatedAt = t.UpdatedAt.ToString("yyyy-MM-dd HH:mm:ss"),
+        Tags = t.TaskTags.Select(tt => ToTagDto(tt.Tag)).ToList()
     };
 }

@@ -17,6 +17,8 @@ public class ColdTrackDbContext(DbContextOptions<ColdTrackDbContext> options) : 
     public DbSet<RolePermission> RolePermissions { get; set; }
     public DbSet<TaskItem> TaskItems { get; set; }
     public DbSet<TaskComment> TaskComments { get; set; }
+    public DbSet<Tag> Tags { get; set; }
+    public DbSet<TaskTag> TaskTags { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -64,6 +66,29 @@ public class ColdTrackDbContext(DbContextOptions<ColdTrackDbContext> options) : 
             entity.HasIndex(c => c.AuthorId);
         });
 
+        builder.Entity<Tag>(entity =>
+        {
+            entity.HasIndex(t => t.Name).IsUnique();
+        });
+
+        builder.Entity<TaskTag>(entity =>
+        {
+            entity.HasKey(tt => new { tt.TaskId, tt.TagId });
+
+            // 删除任务或标签时级联删除关联
+            entity.HasOne(tt => tt.Task)
+                  .WithMany(t => t.TaskTags)
+                  .HasForeignKey(tt => tt.TaskId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(tt => tt.Tag)
+                  .WithMany(t => t.TaskTags)
+                  .HasForeignKey(tt => tt.TagId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(tt => tt.TagId);
+        });
+
         // 权限目录种子
         var permissions = new List<Permission>
         {
@@ -86,6 +111,10 @@ public class ColdTrackDbContext(DbContextOptions<ColdTrackDbContext> options) : 
             new() { Id = 17, Key = Perm.TaskDelete, Name = "任务删除", Group = "任务管理" },
             new() { Id = 18, Key = Perm.RoleManage, Name = "角色与权限管理", Group = "系统设置" },
             new() { Id = 19, Key = Perm.TaskComment, Name = "任务评论", Group = "任务管理" },
+            new() { Id = 20, Key = Perm.TagRead, Name = "标签查看", Group = "任务管理" },
+            new() { Id = 21, Key = Perm.TagCreate, Name = "标签创建", Group = "任务管理" },
+            new() { Id = 22, Key = Perm.TagUpdate, Name = "标签编辑", Group = "任务管理" },
+            new() { Id = 23, Key = Perm.TagDelete, Name = "标签删除", Group = "任务管理" },
         };
         builder.Entity<Permission>().HasData(permissions);
 
@@ -95,7 +124,7 @@ public class ColdTrackDbContext(DbContextOptions<ColdTrackDbContext> options) : 
         {
             rolePermissions.Add(new RolePermission { RoleId = roleAdminId, PermissionId = p.Id });
         }
-        foreach (var id in new[] { 1L, 3L, 6L, 10L, 14L, 19L })
+        foreach (var id in new[] { 1L, 3L, 6L, 10L, 14L, 19L, 20L })
         {
             rolePermissions.Add(new RolePermission { RoleId = roleUserId, PermissionId = id });
         }
