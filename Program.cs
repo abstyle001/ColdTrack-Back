@@ -18,8 +18,27 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddControllers(options => { options.Conventions.Add(new FromServicesPrimaryConstructorConvention()); });
+
+// 数据库 Provider 切换：Database:Provider = "SqlServer"（默认）或 "PostgreSQL"
+var dbProvider = builder.Configuration["Database:Provider"] ?? "SqlServer";
+var usePostgres = string.Equals(dbProvider, "PostgreSQL", StringComparison.OrdinalIgnoreCase);
+if (usePostgres)
+{
+    // 让 DateTime 映射为 timestamp without time zone，与 SQL Server datetime2 语义一致
+    AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+}
+
 builder.Services.AddDbContext<ColdTrackDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    if (usePostgres)
+    {
+        options.UseNpgsql(builder.Configuration.GetConnectionString("PostgresConnection"));
+    }
+    else
+    {
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    }
+});
 builder.Services.AddAuthorization();
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IPermissionService, PermissionService>();

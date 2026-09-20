@@ -1,8 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace ColdTrack_Back.Migrations
+namespace ColdTrack_Back.Migrations.SqlServer
 {
     /// <summary>
     /// 修正 task.comment（权限 19）的角色关联。

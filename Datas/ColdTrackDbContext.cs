@@ -6,7 +6,8 @@ using Perm = ColdTrack_Back.Utils.Permissions;
 
 namespace ColdTrack_Back.Datas;
 
-public class ColdTrackDbContext(DbContextOptions<ColdTrackDbContext> options) : IdentityDbContext<AppUser, IdentityRole, string>(options)
+// 构造函数使用非泛型 DbContextOptions，以便 SqlServer/PostgreSQL 派生上下文复用同一模型
+public class ColdTrackDbContext(DbContextOptions options) : IdentityDbContext<AppUser, IdentityRole, string>(options)
 {
     public DbSet<Position> Positions { get; set; }
     public DbSet<Department> Departments { get; set; }
@@ -116,6 +117,9 @@ public class ColdTrackDbContext(DbContextOptions<ColdTrackDbContext> options) : 
             new() { Id = 22, Key = Perm.TagUpdate, Name = "标签编辑", Group = "任务管理" },
             new() { Id = 23, Key = Perm.TagDelete, Name = "标签删除", Group = "任务管理" },
         };
+        // 固定种子时间戳：避免 CreatedAt 取 DateTime.UtcNow 导致每次模型构建都与快照不一致
+        var seedCreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, DateTimeKind.Utc);
+        foreach (var p in permissions) p.CreatedAt = seedCreatedAt;
         builder.Entity<Permission>().HasData(permissions);
 
         // 角色-权限关联：Admin 拥有全部；User 拥有只读 + 自身编辑
