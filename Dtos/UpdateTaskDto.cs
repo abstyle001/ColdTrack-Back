@@ -8,4 +8,5 @@ public class UpdateTaskDto
     public string? Status { get; set; }
     public string? Priority { get; set; }
     public DateTime? Deadline { get; set; }
+    public List<long>? TagIds { get; set; }
 }

@@ -14,4 +14,6 @@ public class CreateTaskDto
     public string? Priority { get; set; }
 
     public DateTime? Deadline { get; set; }
+
+    public List<long>? TagIds { get; set; }
 }

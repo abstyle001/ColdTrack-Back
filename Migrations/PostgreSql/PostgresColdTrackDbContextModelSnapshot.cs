@@ -3,91 +3,88 @@ using System;
 using ColdTrack_Back.Datas;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace ColdTrack_Back.Migrations
+namespace ColdTrack_Back.Migrations.PostgreSql
 {
-    [DbContext(typeof(ColdTrackDbContext))]
-    [Migration("20260712150149_RoleAndPermissions")]
-    partial class RoleAndPermissions
+    [DbContext(typeof(PostgresColdTrackDbContext))]
+    partial class PostgresColdTrackDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.0")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("ProductVersion", "8.0.11")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("ColdTrack_Back.Models.AppUser", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Avatar")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("City")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("NickName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.HasKey("Id");
 
@@ -96,49 +93,70 @@ namespace ColdTrack_Back.Migrations
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+                        .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "de4d5418-88ef-4d01-80a4-dfc971ae3d47",
+                            AccessFailedCount = 0,
+                            City = "北京市",
+                            ConcurrencyStamp = "1dbe8e32-024a-4d48-9423-000b22811b2f",
+                            CreatedAt = new DateTime(2026, 4, 28, 16, 14, 18, 972, DateTimeKind.Utc).AddTicks(5242),
+                            Email = "admin@cold.com",
+                            EmailConfirmed = false,
+                            LockoutEnabled = true,
+                            NickName = "Admin",
+                            NormalizedEmail = "ADMIN@COLD.COM",
+                            NormalizedUserName = "ADMIN@COLD.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAELUl/KphdKnCALf14U8IuxYFjhP9bK0HguKM2DlGh5bT/RGf17rpOiH4f7FnpzidgA==",
+                            PhoneNumber = "17323895436",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "c25b3ec0-5b13-4e4a-8238-05a87542ada6",
+                            TwoFactorEnabled = false,
+                            UserName = "admin@cold.com"
+                        });
                 });
 
             modelBuilder.Entity("ColdTrack_Back.Models.Department", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Addition")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Explain")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int>("Level")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("ManagerId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("MaxSeq")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ParentId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Workspace")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -151,14 +169,14 @@ namespace ColdTrack_Back.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<int>("ChildId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("ParentId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -171,25 +189,25 @@ namespace ColdTrack_Back.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Group")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Key")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -199,7 +217,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 1L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(478),
+                            CreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             Group = "用户管理",
                             Key = "user.read",
                             Name = "用户查看"
@@ -207,7 +225,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 2L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(482),
+                            CreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             Group = "用户管理",
                             Key = "user.create",
                             Name = "用户创建"
@@ -215,7 +233,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 3L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(483),
+                            CreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             Group = "用户管理",
                             Key = "user.update",
                             Name = "用户编辑"
@@ -223,7 +241,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 4L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(484),
+                            CreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             Group = "用户管理",
                             Key = "user.delete",
                             Name = "用户删除"
@@ -231,7 +249,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 5L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(485),
+                            CreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             Group = "用户管理",
                             Key = "user.assign",
                             Name = "用户分配职位"
@@ -239,7 +257,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 6L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(488),
+                            CreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             Group = "部门管理",
                             Key = "department.read",
                             Name = "部门查看"
@@ -247,7 +265,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 7L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(489),
+                            CreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             Group = "部门管理",
                             Key = "department.create",
                             Name = "部门创建"
@@ -255,7 +273,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 8L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(513),
+                            CreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             Group = "部门管理",
                             Key = "department.update",
                             Name = "部门编辑"
@@ -263,7 +281,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 9L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(514),
+                            CreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             Group = "部门管理",
                             Key = "department.delete",
                             Name = "部门删除"
@@ -271,7 +289,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 10L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(516),
+                            CreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             Group = "职位管理",
                             Key = "position.read",
                             Name = "职位查看"
@@ -279,7 +297,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 11L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(517),
+                            CreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             Group = "职位管理",
                             Key = "position.create",
                             Name = "职位创建"
@@ -287,7 +305,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 12L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(518),
+                            CreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             Group = "职位管理",
                             Key = "position.update",
                             Name = "职位编辑"
@@ -295,7 +313,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 13L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(519),
+                            CreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             Group = "职位管理",
                             Key = "position.delete",
                             Name = "职位删除"
@@ -303,7 +321,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 14L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(520),
+                            CreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             Group = "任务管理",
                             Key = "task.read",
                             Name = "任务查看"
@@ -311,7 +329,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 15L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(520),
+                            CreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             Group = "任务管理",
                             Key = "task.create",
                             Name = "任务创建"
@@ -319,7 +337,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 16L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(521),
+                            CreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             Group = "任务管理",
                             Key = "task.update",
                             Name = "任务编辑"
@@ -327,7 +345,7 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 17L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(522),
+                            CreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             Group = "任务管理",
                             Key = "task.delete",
                             Name = "任务删除"
@@ -335,10 +353,50 @@ namespace ColdTrack_Back.Migrations
                         new
                         {
                             Id = 18L,
-                            CreatedAt = new DateTime(2026, 7, 12, 15, 1, 47, 674, DateTimeKind.Utc).AddTicks(524),
+                            CreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc),
                             Group = "系统设置",
                             Key = "role.manage",
                             Name = "角色与权限管理"
+                        },
+                        new
+                        {
+                            Id = 19L,
+                            CreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Group = "任务管理",
+                            Key = "task.comment",
+                            Name = "任务评论"
+                        },
+                        new
+                        {
+                            Id = 20L,
+                            CreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Group = "任务管理",
+                            Key = "tag.read",
+                            Name = "标签查看"
+                        },
+                        new
+                        {
+                            Id = 21L,
+                            CreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Group = "任务管理",
+                            Key = "tag.create",
+                            Name = "标签创建"
+                        },
+                        new
+                        {
+                            Id = 22L,
+                            CreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Group = "任务管理",
+                            Key = "tag.update",
+                            Name = "标签编辑"
+                        },
+                        new
+                        {
+                            Id = 23L,
+                            CreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Group = "任务管理",
+                            Key = "tag.delete",
+                            Name = "标签删除"
                         });
                 });
 
@@ -348,25 +406,25 @@ namespace ColdTrack_Back.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Addition")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Duty")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Workspace")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -379,11 +437,11 @@ namespace ColdTrack_Back.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("DepartmentId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<long>("PositionId")
                         .HasColumnType("bigint");
@@ -396,7 +454,7 @@ namespace ColdTrack_Back.Migrations
             modelBuilder.Entity("ColdTrack_Back.Models.RolePermission", b =>
                 {
                     b.Property<string>("RoleId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<long>("PermissionId")
                         .HasColumnType("bigint");
@@ -498,6 +556,31 @@ namespace ColdTrack_Back.Migrations
                         },
                         new
                         {
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67",
+                            PermissionId = 19L
+                        },
+                        new
+                        {
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67",
+                            PermissionId = 20L
+                        },
+                        new
+                        {
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67",
+                            PermissionId = 21L
+                        },
+                        new
+                        {
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67",
+                            PermissionId = 22L
+                        },
+                        new
+                        {
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67",
+                            PermissionId = 23L
+                        },
+                        new
+                        {
                             RoleId = "a96a582b-2ab9-4528-8d45-b3a78f552e0f",
                             PermissionId = 1L
                         },
@@ -520,7 +603,136 @@ namespace ColdTrack_Back.Migrations
                         {
                             RoleId = "a96a582b-2ab9-4528-8d45-b3a78f552e0f",
                             PermissionId = 14L
+                        },
+                        new
+                        {
+                            RoleId = "a96a582b-2ab9-4528-8d45-b3a78f552e0f",
+                            PermissionId = 19L
+                        },
+                        new
+                        {
+                            RoleId = "a96a582b-2ab9-4528-8d45-b3a78f552e0f",
+                            PermissionId = 20L
                         });
+                });
+
+            modelBuilder.Entity("ColdTrack_Back.Models.Tag", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Color")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Tags");
+                });
+
+            modelBuilder.Entity("ColdTrack_Back.Models.TaskComment", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("AuthorId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<long>("TaskId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("TaskId");
+
+                    b.ToTable("TaskComments");
+                });
+
+            modelBuilder.Entity("ColdTrack_Back.Models.TaskItem", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("AssigneeId")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("CreatorId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("Deadline")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssigneeId");
+
+                    b.HasIndex("CreatorId");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("Tasks");
+                });
+
+            modelBuilder.Entity("ColdTrack_Back.Models.TaskTag", b =>
+                {
+                    b.Property<long>("TaskId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("TagId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("TaskId", "TagId");
+
+                    b.HasIndex("TagId");
+
+                    b.ToTable("TaskTags");
                 });
 
             modelBuilder.Entity("ColdTrack_Back.Models.UserPosition", b =>
@@ -529,14 +741,14 @@ namespace ColdTrack_Back.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<long>("PositionId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -546,47 +758,60 @@ namespace ColdTrack_Back.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("NormalizedName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedName")
                         .IsUnique()
-                        .HasDatabaseName("RoleNameIndex")
-                        .HasFilter("[NormalizedName] IS NOT NULL");
+                        .HasDatabaseName("RoleNameIndex");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "417355cb-7f8b-4628-b6c9-c34af297ea67",
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = "a96a582b-2ab9-4528-8d45-b3a78f552e0f",
+                            Name = "User",
+                            NormalizedName = "USER"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("RoleId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -599,19 +824,19 @@ namespace ColdTrack_Back.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -623,17 +848,17 @@ namespace ColdTrack_Back.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ProviderDisplayName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -645,35 +870,97 @@ namespace ColdTrack_Back.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("RoleId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.HasKey("UserId", "RoleId");
 
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = "de4d5418-88ef-4d01-80a4-dfc971ae3d47",
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Value")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("ColdTrack_Back.Models.TaskComment", b =>
+                {
+                    b.HasOne("ColdTrack_Back.Models.AppUser", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("ColdTrack_Back.Models.TaskItem", "Task")
+                        .WithMany()
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Task");
+                });
+
+            modelBuilder.Entity("ColdTrack_Back.Models.TaskItem", b =>
+                {
+                    b.HasOne("ColdTrack_Back.Models.AppUser", "Assignee")
+                        .WithMany()
+                        .HasForeignKey("AssigneeId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("ColdTrack_Back.Models.AppUser", "Creator")
+                        .WithMany()
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Assignee");
+
+                    b.Navigation("Creator");
+                });
+
+            modelBuilder.Entity("ColdTrack_Back.Models.TaskTag", b =>
+                {
+                    b.HasOne("ColdTrack_Back.Models.Tag", "Tag")
+                        .WithMany("TaskTags")
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ColdTrack_Back.Models.TaskItem", "Task")
+                        .WithMany("TaskTags")
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tag");
+
+                    b.Navigation("Task");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -725,6 +1012,16 @@ namespace ColdTrack_Back.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("ColdTrack_Back.Models.Tag", b =>
+                {
+                    b.Navigation("TaskTags");
+                });
+
+            modelBuilder.Entity("ColdTrack_Back.Models.TaskItem", b =>
+                {
+                    b.Navigation("TaskTags");
                 });
 #pragma warning restore 612, 618
         }

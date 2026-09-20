@@ -42,14 +42,15 @@ public class TaskController(TaskRepository taskRepository) : ControllerBase
         [FromQuery] int size,
         [FromQuery] string? status = null,
         [FromQuery] string? priority = null,
-        [FromQuery] string? assigneeId = null)
+        [FromQuery] string? assigneeId = null,
+        [FromQuery] long? tagId = null)
     {
         // Non-admin users can only see tasks assigned to them
         if (!User.IsInRole("Admin"))
             assigneeId = User.FindFirstValue(ClaimTypes.NameIdentifier)
                          ?? User.FindFirstValue("sub")
                          ?? User.FindFirstValue("id");
-        return Ok(await taskRepository.GetPage(number, size, status, priority, assigneeId));
+        return Ok(await taskRepository.GetPage(number, size, status, priority, assigneeId, tagId));
     }
 
     [HttpGet]
@@ -58,14 +59,15 @@ public class TaskController(TaskRepository taskRepository) : ControllerBase
     public ActionResult<long> GetCount(
         [FromQuery] string? status = null,
         [FromQuery] string? priority = null,
-        [FromQuery] string? assigneeId = null)
+        [FromQuery] string? assigneeId = null,
+        [FromQuery] long? tagId = null)
     {
         // Non-admin users can only see tasks assigned to them
         if (!User.IsInRole("Admin"))
             assigneeId = User.FindFirstValue(ClaimTypes.NameIdentifier)
                          ?? User.FindFirstValue("sub")
                          ?? User.FindFirstValue("id");
-        return Ok(taskRepository.GetCount(status, priority, assigneeId));
+        return Ok(taskRepository.GetCount(status, priority, assigneeId, tagId));
     }
 
     [HttpPost]

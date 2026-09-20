@@ -31,6 +31,12 @@ public static class Permissions
     public const string TaskDelete = "task.delete";
     public const string TaskComment = "task.comment";
 
+    // 标签管理
+    public const string TagRead = "tag.read";
+    public const string TagCreate = "tag.create";
+    public const string TagUpdate = "tag.update";
+    public const string TagDelete = "tag.delete";
+
     // 系统设置：角色与权限管理
     public const string RoleManage = "role.manage";
 

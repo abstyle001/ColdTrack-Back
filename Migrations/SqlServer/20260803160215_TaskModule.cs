@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace ColdTrack_Back.Migrations
+namespace ColdTrack_Back.Migrations.SqlServer
 {
     /// <inheritdoc />
     public partial class TaskModule : Migration
