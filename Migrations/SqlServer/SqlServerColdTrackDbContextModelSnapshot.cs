@@ -376,6 +376,38 @@ namespace ColdTrack_Back.Migrations.SqlServer
                             Group = "任务管理",
                             Key = "tag.delete",
                             Name = "标签删除"
+                        },
+                        new
+                        {
+                            Id = 24L,
+                            CreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Group = "项目管理",
+                            Key = "project.read",
+                            Name = "项目查看"
+                        },
+                        new
+                        {
+                            Id = 25L,
+                            CreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Group = "项目管理",
+                            Key = "project.create",
+                            Name = "项目创建"
+                        },
+                        new
+                        {
+                            Id = 26L,
+                            CreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Group = "项目管理",
+                            Key = "project.update",
+                            Name = "项目编辑"
+                        },
+                        new
+                        {
+                            Id = 27L,
+                            CreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Group = "项目管理",
+                            Key = "project.delete",
+                            Name = "项目删除"
                         });
                 });
 
@@ -428,6 +460,72 @@ namespace ColdTrack_Back.Migrations.SqlServer
                     b.HasKey("Id");
 
                     b.ToTable("PositionDepartments");
+                });
+
+            modelBuilder.Entity("ColdTrack_Back.Models.Project", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ManagerId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ManagerId");
+
+                    b.ToTable("Projects");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1L,
+                            CreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "系统默认项目，存放未分类任务",
+                            Name = "默认项目",
+                            Status = 0,
+                            UpdatedAt = new DateTime(2026, 7, 11, 0, 0, 0, 0, DateTimeKind.Utc)
+                        });
+                });
+
+            modelBuilder.Entity("ColdTrack_Back.Models.ProjectMember", b =>
+                {
+                    b.Property<long>("ProjectId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("ProjectId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ProjectMembers");
                 });
 
             modelBuilder.Entity("ColdTrack_Back.Models.RolePermission", b =>
@@ -560,6 +658,26 @@ namespace ColdTrack_Back.Migrations.SqlServer
                         },
                         new
                         {
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67",
+                            PermissionId = 24L
+                        },
+                        new
+                        {
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67",
+                            PermissionId = 25L
+                        },
+                        new
+                        {
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67",
+                            PermissionId = 26L
+                        },
+                        new
+                        {
+                            RoleId = "417355cb-7f8b-4628-b6c9-c34af297ea67",
+                            PermissionId = 27L
+                        },
+                        new
+                        {
                             RoleId = "a96a582b-2ab9-4528-8d45-b3a78f552e0f",
                             PermissionId = 1L
                         },
@@ -592,6 +710,11 @@ namespace ColdTrack_Back.Migrations.SqlServer
                         {
                             RoleId = "a96a582b-2ab9-4528-8d45-b3a78f552e0f",
                             PermissionId = 20L
+                        },
+                        new
+                        {
+                            RoleId = "a96a582b-2ab9-4528-8d45-b3a78f552e0f",
+                            PermissionId = 24L
                         });
                 });
 
@@ -678,6 +801,9 @@ namespace ColdTrack_Back.Migrations.SqlServer
                     b.Property<int>("Priority")
                         .HasColumnType("int");
 
+                    b.Property<long>("ProjectId")
+                        .HasColumnType("bigint");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -693,6 +819,8 @@ namespace ColdTrack_Back.Migrations.SqlServer
                     b.HasIndex("AssigneeId");
 
                     b.HasIndex("CreatorId");
+
+                    b.HasIndex("ProjectId");
 
                     b.HasIndex("Status");
 
@@ -867,6 +995,35 @@ namespace ColdTrack_Back.Migrations.SqlServer
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("ColdTrack_Back.Models.Project", b =>
+                {
+                    b.HasOne("ColdTrack_Back.Models.AppUser", "Manager")
+                        .WithMany()
+                        .HasForeignKey("ManagerId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Manager");
+                });
+
+            modelBuilder.Entity("ColdTrack_Back.Models.ProjectMember", b =>
+                {
+                    b.HasOne("ColdTrack_Back.Models.Project", "Project")
+                        .WithMany("Members")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ColdTrack_Back.Models.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("ColdTrack_Back.Models.TaskComment", b =>
                 {
                     b.HasOne("ColdTrack_Back.Models.AppUser", "Author")
@@ -898,9 +1055,17 @@ namespace ColdTrack_Back.Migrations.SqlServer
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
+                    b.HasOne("ColdTrack_Back.Models.Project", "Project")
+                        .WithMany("Tasks")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Assignee");
 
                     b.Navigation("Creator");
+
+                    b.Navigation("Project");
                 });
 
             modelBuilder.Entity("ColdTrack_Back.Models.TaskTag", b =>
@@ -971,6 +1136,13 @@ namespace ColdTrack_Back.Migrations.SqlServer
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("ColdTrack_Back.Models.Project", b =>
+                {
+                    b.Navigation("Members");
+
+                    b.Navigation("Tasks");
                 });
 
             modelBuilder.Entity("ColdTrack_Back.Models.Tag", b =>

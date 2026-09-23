@@ -34,6 +34,11 @@ public class TaskItem
 
     public DateTime? Deadline { get; set; }
 
+    [Required]
+    public long ProjectId { get; set; }
+    [ForeignKey(nameof(ProjectId))]
+    public Project Project { get; set; } = null!;
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 

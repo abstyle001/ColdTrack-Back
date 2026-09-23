@@ -1,4 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using ColdTrack_Back.Authorization;
 using ColdTrack_Back.Datas;
@@ -55,6 +55,8 @@ public class AccountController(
             var createUser = await userManager.CreateAsync(appUser, dto.Password);
             if (createUser.Succeeded)
             {
+                // 新用户默认分配 User 角色，否则角色/权限为空，所有受权限保护的接口都会 403
+                await userManager.AddToRoleAsync(appUser, "User");
                 var roles = await userManager.GetRolesAsync(appUser);
                 var avatar = await AvatarUtil.UploadAvatar(appUser.Id, dto.File, config, env);
                 appUser.Avatar = avatar;

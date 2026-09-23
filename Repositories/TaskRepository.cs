@@ -7,13 +7,23 @@ namespace ColdTrack_Back.Repositories;
 
 public class TaskRepository(ColdTrackDbContext db)
 {
-    public async Task<IEnumerable<TaskDto>> GetAll(string? assigneeId = null)
+    // 可见性：Admin 看全部；普通用户看「分配给自己的」「自己负责的项目下的」或「自己所在项目下的」任务
+    private static IQueryable<TaskItem> ApplyVisibility(IQueryable<TaskItem> query, string userId, bool isAdmin)
+        => isAdmin ? query : query.Where(t => t.AssigneeId == userId
+            || t.Project.ManagerId == userId
+            || t.Project.Members.Any(m => m.UserId == userId));
+
+    public async Task<IEnumerable<TaskDto>> GetAll(string userId, bool isAdmin, long? projectId = null, string? assigneeId = null)
     {
         var query = db.TaskItems.AsQueryable();
+        query = ApplyVisibility(query, userId, isAdmin);
+        if (projectId.HasValue)
+            query = query.Where(t => t.ProjectId == projectId.Value);
         if (!string.IsNullOrEmpty(assigneeId))
             query = query.Where(t => t.AssigneeId == assigneeId);
         return await query
             .OrderByDescending(t => t.CreatedAt)
+            .Include(t => t.Project)
             .Include(t => t.TaskTags).ThenInclude(tt => tt.Tag)
             .Select(t => ToDto(t))
             .ToListAsync();
@@ -24,19 +34,23 @@ public class TaskRepository(ColdTrackDbContext db)
         var task = await db.TaskItems
             .Include(t => t.Assignee)
             .Include(t => t.Creator)
+            .Include(t => t.Project)
             .Include(t => t.TaskTags).ThenInclude(tt => tt.Tag)
             .FirstOrDefaultAsync(t => t.Id == id);
         return task == null ? null : ToDto(task);
     }
 
-    public async Task<IEnumerable<TaskDto>> GetPage(int number, int size, string? status = null, string? priority = null, string? assigneeId = null, long? tagId = null)
+    public async Task<IEnumerable<TaskDto>> GetPage(int number, int size, string? status = null, string? priority = null, string? assigneeId = null, long? tagId = null, long? projectId = null, string userId = "", bool isAdmin = true)
     {
         var query = db.TaskItems.AsQueryable();
+        query = ApplyVisibility(query, userId, isAdmin);
 
         if (!string.IsNullOrEmpty(status) && Enum.TryParse<TaskItem.StatusValue>(status, out var s))
             query = query.Where(t => t.Status == s);
         if (!string.IsNullOrEmpty(priority) && Enum.TryParse<TaskItem.PriorityValue>(priority, out var p))
             query = query.Where(t => t.Priority == p);
+        if (projectId.HasValue)
+            query = query.Where(t => t.ProjectId == projectId.Value);
         if (!string.IsNullOrEmpty(assigneeId))
             query = query.Where(t => t.AssigneeId == assigneeId);
         if (tagId.HasValue)
@@ -46,18 +60,22 @@ public class TaskRepository(ColdTrackDbContext db)
             .OrderByDescending(t => t.CreatedAt)
             .Skip((number - 1) * size)
             .Take(size)
+            .Include(t => t.Project)
             .Include(t => t.TaskTags).ThenInclude(tt => tt.Tag)
             .Select(t => ToDto(t))
             .ToListAsync();
     }
 
-    public int GetCount(string? status = null, string? priority = null, string? assigneeId = null, long? tagId = null)
+    public int GetCount(string? status = null, string? priority = null, string? assigneeId = null, long? tagId = null, long? projectId = null, string userId = "", bool isAdmin = true)
     {
         var query = db.TaskItems.AsQueryable();
+        query = ApplyVisibility(query, userId, isAdmin);
         if (!string.IsNullOrEmpty(status) && Enum.TryParse<TaskItem.StatusValue>(status, out var s))
             query = query.Where(t => t.Status == s);
         if (!string.IsNullOrEmpty(priority) && Enum.TryParse<TaskItem.PriorityValue>(priority, out var p))
             query = query.Where(t => t.Priority == p);
+        if (projectId.HasValue)
+            query = query.Where(t => t.ProjectId == projectId.Value);
         if (!string.IsNullOrEmpty(assigneeId))
             query = query.Where(t => t.AssigneeId == assigneeId);
         if (tagId.HasValue)
@@ -67,6 +85,16 @@ public class TaskRepository(ColdTrackDbContext db)
 
     public async Task<TaskDto> Create(CreateTaskDto dto, string creatorId)
     {
+        var projectExists = await db.Projects.AnyAsync(p => p.Id == dto.ProjectId);
+        if (!projectExists)
+            throw new InvalidOperationException("项目不存在");
+        if (!string.IsNullOrEmpty(dto.AssigneeId))
+        {
+            var isMember = await db.ProjectMembers.AnyAsync(pm => pm.ProjectId == dto.ProjectId && pm.UserId == dto.AssigneeId);
+            if (!isMember)
+                throw new InvalidOperationException("负责人必须是项目成员");
+        }
+
         var priority = TaskItem.PriorityValue.Medium;
         if (!string.IsNullOrEmpty(dto.Priority))
             Enum.TryParse<TaskItem.PriorityValue>(dto.Priority, out priority);
@@ -77,6 +105,7 @@ public class TaskRepository(ColdTrackDbContext db)
             Description = dto.Description,
             AssigneeId = dto.AssigneeId,
             CreatorId = creatorId,
+            ProjectId = dto.ProjectId,
             Priority = priority,
             Deadline = dto.Deadline,
             CreatedAt = DateTime.UtcNow,
@@ -106,6 +135,21 @@ public class TaskRepository(ColdTrackDbContext db)
         if (dto.Title != null) task.Title = dto.Title;
         if (dto.Description != null) task.Description = dto.Description;
         if (dto.AssigneeId != null) task.AssigneeId = dto.AssigneeId;
+        if (dto.ProjectId.HasValue)
+        {
+            var projectExists = await db.Projects.AnyAsync(p => p.Id == dto.ProjectId.Value);
+            if (!projectExists)
+                throw new InvalidOperationException("项目不存在");
+            // 任务挂到目标项目时，负责人（新设或已有的）必须是该项目成员
+            var effectiveAssigneeId = dto.AssigneeId ?? task.AssigneeId;
+            if (!string.IsNullOrEmpty(effectiveAssigneeId))
+            {
+                var isMember = await db.ProjectMembers.AnyAsync(pm => pm.ProjectId == dto.ProjectId.Value && pm.UserId == effectiveAssigneeId);
+                if (!isMember)
+                    throw new InvalidOperationException("负责人必须是项目成员");
+            }
+            task.ProjectId = dto.ProjectId.Value;
+        }
         if (dto.Status != null && Enum.TryParse<TaskItem.StatusValue>(dto.Status, out var s))
             task.Status = s;
         if (dto.Priority != null && Enum.TryParse<TaskItem.PriorityValue>(dto.Priority, out var p))
@@ -219,6 +263,7 @@ public class TaskRepository(ColdTrackDbContext db)
             query = query.Where(t => t.AssigneeId == assigneeId);
 
         var tasks = await query
+            .Include(t => t.Project)
             .Include(t => t.TaskTags).ThenInclude(tt => tt.Tag)
             .ToListAsync();
         foreach (var task in tasks)
@@ -233,9 +278,7 @@ public class TaskRepository(ColdTrackDbContext db)
     public async Task<TaskStatsDto> GetStats(string userId, bool isAdmin)
     {
         var now = DateTime.UtcNow;
-        var query = db.TaskItems.AsQueryable();
-        if (!isAdmin)
-            query = query.Where(t => t.AssigneeId == userId);
+        var query = ApplyVisibility(db.TaskItems.AsQueryable(), userId, isAdmin);
 
         return new TaskStatsDto
         {
@@ -282,6 +325,8 @@ public class TaskRepository(ColdTrackDbContext db)
         AssigneeName = t.Assignee != null ? t.Assignee.NickName : null,
         CreatorId = t.CreatorId,
         CreatorName = t.Creator != null ? (t.Creator.NickName ?? "") : "",
+        ProjectId = t.ProjectId,
+        ProjectName = t.Project != null ? t.Project.Name : "",
         Status = t.Status.ToString(),
         Priority = t.Priority.ToString(),
         Deadline = t.Deadline.HasValue ? t.Deadline.Value.ToString("yyyy-MM-dd HH:mm:ss") : null,

@@ -81,6 +81,7 @@ builder.Services.AddScoped<UserPositionRepository>();
 builder.Services.AddScoped<PositionDepartmentRepository>();
 builder.Services.AddScoped<TaskRepository>();
 builder.Services.AddScoped<TagRepository>();
+builder.Services.AddScoped<ProjectRepository>();
 builder.Services.AddScoped<TokenService>();
 
 var app = builder.Build();
