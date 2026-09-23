@@ -20,6 +20,8 @@ public class ColdTrackDbContext(DbContextOptions options) : IdentityDbContext<Ap
     public DbSet<TaskComment> TaskComments { get; set; }
     public DbSet<Tag> Tags { get; set; }
     public DbSet<TaskTag> TaskTags { get; set; }
+    public DbSet<Project> Projects { get; set; }
+    public DbSet<ProjectMember> ProjectMembers { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -90,6 +92,46 @@ public class ColdTrackDbContext(DbContextOptions options) : IdentityDbContext<Ap
             entity.HasIndex(tt => tt.TagId);
         });
 
+        builder.Entity<Project>(entity =>
+        {
+            // 负责人被删除时项目保留，负责人置空
+            entity.HasOne(p => p.Manager)
+                  .WithMany()
+                  .HasForeignKey(p => p.ManagerId)
+                  .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasIndex(p => p.ManagerId);
+        });
+
+        builder.Entity<ProjectMember>(entity =>
+        {
+            entity.HasKey(pm => new { pm.ProjectId, pm.UserId });
+
+            // 删除项目或用户时级联删除成员关联
+            entity.HasOne(pm => pm.Project)
+                  .WithMany(p => p.Members)
+                  .HasForeignKey(pm => pm.ProjectId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(pm => pm.User)
+                  .WithMany()
+                  .HasForeignKey(pm => pm.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(pm => pm.UserId);
+        });
+
+        builder.Entity<TaskItem>(entity =>
+        {
+            // 项目下有任务时禁止删除项目（仓库层也会拦截，数据库级兜底）
+            entity.HasOne(t => t.Project)
+                  .WithMany(p => p.Tasks)
+                  .HasForeignKey(t => t.ProjectId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(t => t.ProjectId);
+        });
+
         // 权限目录种子
         var permissions = new List<Permission>
         {
@@ -116,6 +158,10 @@ public class ColdTrackDbContext(DbContextOptions options) : IdentityDbContext<Ap
             new() { Id = 21, Key = Perm.TagCreate, Name = "标签创建", Group = "任务管理" },
             new() { Id = 22, Key = Perm.TagUpdate, Name = "标签编辑", Group = "任务管理" },
             new() { Id = 23, Key = Perm.TagDelete, Name = "标签删除", Group = "任务管理" },
+            new() { Id = 24, Key = Perm.ProjectRead, Name = "项目查看", Group = "项目管理" },
+            new() { Id = 25, Key = Perm.ProjectCreate, Name = "项目创建", Group = "项目管理" },
+            new() { Id = 26, Key = Perm.ProjectUpdate, Name = "项目编辑", Group = "项目管理" },
+            new() { Id = 27, Key = Perm.ProjectDelete, Name = "项目删除", Group = "项目管理" },
         };
         // 固定种子时间戳：避免 CreatedAt 取 DateTime.UtcNow 导致每次模型构建都与快照不一致
         var seedCreatedAt = new DateTime(2026, 7, 11, 0, 0, 0, DateTimeKind.Utc);
@@ -128,10 +174,22 @@ public class ColdTrackDbContext(DbContextOptions options) : IdentityDbContext<Ap
         {
             rolePermissions.Add(new RolePermission { RoleId = roleAdminId, PermissionId = p.Id });
         }
-        foreach (var id in new[] { 1L, 3L, 6L, 10L, 14L, 19L, 20L })
+        foreach (var id in new[] { 1L, 3L, 6L, 10L, 14L, 19L, 20L, 24L })
         {
             rolePermissions.Add(new RolePermission { RoleId = roleUserId, PermissionId = id });
         }
         builder.Entity<RolePermission>().HasData(rolePermissions);
+
+        // 默认项目：承接存量未分类任务（Tasks.ProjectId 迁移默认值指向它）
+        builder.Entity<Project>().HasData(new Project
+        {
+            Id = 1,
+            Name = "默认项目",
+            Description = "系统默认项目，存放未分类任务",
+            ManagerId = null,
+            Status = Project.StatusValue.InProgress,
+            CreatedAt = seedCreatedAt,
+            UpdatedAt = seedCreatedAt
+        });
     }
 }

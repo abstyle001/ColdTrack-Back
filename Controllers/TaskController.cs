@@ -2,25 +2,28 @@ using System.Security.Claims;
 using ColdTrack_Back.Authorization;
 using ColdTrack_Back.Dtos;
 using ColdTrack_Back.Repositories;
+using ColdTrack_Back.Services;
 using ColdTrack_Back.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ColdTrack_Back.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class TaskController(TaskRepository taskRepository) : ControllerBase
+public class TaskController(TaskRepository taskRepository, ProjectRepository projectRepository, IPermissionCacheService cacheService) : ControllerBase
 {
     [HttpGet]
     [HasPermission(Permissions.TaskRead)]
     public async Task<ActionResult<IEnumerable<TaskDto>>> GetAll(
+        [FromQuery] long? projectId = null,
         [FromQuery] string? assigneeId = null)
     {
-        if (!User.IsInRole("Admin"))
-            assigneeId = User.FindFirstValue(ClaimTypes.NameIdentifier)
-                         ?? User.FindFirstValue("sub")
-                         ?? User.FindFirstValue("id");
-        return Ok(await taskRepository.GetAll(assigneeId));
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                     ?? User.FindFirstValue("sub")
+                     ?? User.FindFirstValue("id") ?? "";
+        var isAdmin = User.IsInRole("Admin");
+        return Ok(await taskRepository.GetAll(userId, isAdmin, projectId, assigneeId));
     }
 
     [HttpGet]
@@ -43,14 +46,15 @@ public class TaskController(TaskRepository taskRepository) : ControllerBase
         [FromQuery] string? status = null,
         [FromQuery] string? priority = null,
         [FromQuery] string? assigneeId = null,
-        [FromQuery] long? tagId = null)
+        [FromQuery] long? tagId = null,
+        [FromQuery] long? projectId = null)
     {
-        // Non-admin users can only see tasks assigned to them
-        if (!User.IsInRole("Admin"))
-            assigneeId = User.FindFirstValue(ClaimTypes.NameIdentifier)
-                         ?? User.FindFirstValue("sub")
-                         ?? User.FindFirstValue("id");
-        return Ok(await taskRepository.GetPage(number, size, status, priority, assigneeId, tagId));
+        // 可见性（本人任务 + 本人负责项目的任务）在仓库层按 userId/isAdmin 叠加
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                     ?? User.FindFirstValue("sub")
+                     ?? User.FindFirstValue("id") ?? "";
+        var isAdmin = User.IsInRole("Admin");
+        return Ok(await taskRepository.GetPage(number, size, status, priority, assigneeId, tagId, projectId, userId, isAdmin));
     }
 
     [HttpGet]
@@ -60,18 +64,19 @@ public class TaskController(TaskRepository taskRepository) : ControllerBase
         [FromQuery] string? status = null,
         [FromQuery] string? priority = null,
         [FromQuery] string? assigneeId = null,
-        [FromQuery] long? tagId = null)
+        [FromQuery] long? tagId = null,
+        [FromQuery] long? projectId = null)
     {
-        // Non-admin users can only see tasks assigned to them
-        if (!User.IsInRole("Admin"))
-            assigneeId = User.FindFirstValue(ClaimTypes.NameIdentifier)
-                         ?? User.FindFirstValue("sub")
-                         ?? User.FindFirstValue("id");
-        return Ok(taskRepository.GetCount(status, priority, assigneeId, tagId));
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                     ?? User.FindFirstValue("sub")
+                     ?? User.FindFirstValue("id") ?? "";
+        var isAdmin = User.IsInRole("Admin");
+        return Ok(taskRepository.GetCount(status, priority, assigneeId, tagId, projectId, userId, isAdmin));
     }
 
+    // 手动鉴权：拥有 task.create 权限，或目标项目的负责人
     [HttpPost]
-    [HasPermission(Permissions.TaskCreate)]
+    [Authorize]
     public async Task<ActionResult<TaskDto>> Create([FromBody] CreateTaskDto dto)
     {
         var creatorId = User.FindFirstValue(ClaimTypes.NameIdentifier)
@@ -79,70 +84,145 @@ public class TaskController(TaskRepository taskRepository) : ControllerBase
                         ?? User.FindFirstValue("id");
         if (string.IsNullOrEmpty(creatorId))
             return Unauthorized("无法获取用户身份");
-        var task = await taskRepository.Create(dto, creatorId);
-        return Ok(task);
+        var perms = await cacheService.GetPermissionsAsync(creatorId);
+        if (!perms.Contains(Permissions.TaskCreate) && !await projectRepository.IsManager(dto.ProjectId, creatorId))
+            return Forbid();
+        try
+        {
+            return Ok(await taskRepository.Create(dto, creatorId));
+        }
+        catch (InvalidOperationException e)
+        {
+            return BadRequest(e.Message);
+        }
     }
 
+    // 手动鉴权：拥有 task.update 权限，或该任务所属项目的负责人
     [HttpPut]
     [Route("{id:long}")]
-    [HasPermission(Permissions.TaskUpdate)]
+    [Authorize]
     public async Task<ActionResult<TaskDto>> Update([FromRoute] long id, [FromBody] UpdateTaskDto dto)
     {
-        var task = await taskRepository.Update(id, dto);
-        if (task == null)
-            return BadRequest("任务不存在");
-        return Ok(task);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                     ?? User.FindFirstValue("sub")
+                     ?? User.FindFirstValue("id");
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized("无法获取用户身份");
+        var perms = await cacheService.GetPermissionsAsync(userId);
+        if (!perms.Contains(Permissions.TaskUpdate) && !await projectRepository.IsManagerOfTask(id, userId))
+            return Forbid();
+        try
+        {
+            var task = await taskRepository.Update(id, dto);
+            if (task == null)
+                return BadRequest("任务不存在");
+            return Ok(task);
+        }
+        catch (InvalidOperationException e)
+        {
+            return BadRequest(e.Message);
+        }
     }
 
+    // 手动鉴权：拥有 task.delete 权限，或该任务所属项目的负责人
     [HttpDelete]
     [Route("{id:long}")]
-    [HasPermission(Permissions.TaskDelete)]
+    [Authorize]
     public async Task<ActionResult> Delete([FromRoute] long id)
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                     ?? User.FindFirstValue("sub")
+                     ?? User.FindFirstValue("id");
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized("无法获取用户身份");
+        var perms = await cacheService.GetPermissionsAsync(userId);
+        if (!perms.Contains(Permissions.TaskDelete) && !await projectRepository.IsManagerOfTask(id, userId))
+            return Forbid();
         var ok = await taskRepository.Delete(id);
         if (!ok)
             return BadRequest("任务不存在");
         return Ok();
     }
 
+    // 手动鉴权：拥有 task.delete 权限，或全部任务所属项目的负责人
     [HttpDelete]
     [Route("batch")]
-    [HasPermission(Permissions.TaskDelete)]
+    [Authorize]
     public async Task<ActionResult> DeleteBatch([FromBody] List<long> ids)
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                     ?? User.FindFirstValue("sub")
+                     ?? User.FindFirstValue("id");
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized("无法获取用户身份");
+        var perms = await cacheService.GetPermissionsAsync(userId);
+        if (!perms.Contains(Permissions.TaskDelete))
+        {
+            foreach (var id in ids)
+            {
+                if (!await projectRepository.IsManagerOfTask(id, userId))
+                    return Forbid();
+            }
+        }
         await taskRepository.DeleteBatch(ids);
         return Ok();
     }
 
+    // 手动鉴权：拥有 task.update 权限或项目负责人可改任意任务状态；普通用户只能改分配给自己的任务
     [HttpPatch]
     [Route("{id:long}/status")]
-    [HasPermission(Permissions.TaskUpdate)]
+    [Authorize]
     public async Task<ActionResult<TaskDto>> UpdateStatus(
         [FromRoute] long id,
         [FromBody] UpdateTaskStatusDto dto)
     {
-        var assigneeId = User.IsInRole("Admin")
-            ? null
-            : User.FindFirstValue(ClaimTypes.NameIdentifier)
-              ?? User.FindFirstValue("sub")
-              ?? User.FindFirstValue("id");
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                     ?? User.FindFirstValue("sub")
+                     ?? User.FindFirstValue("id");
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized("无法获取用户身份");
+        var perms = await cacheService.GetPermissionsAsync(userId);
+        string? assigneeId = userId;
+        if (perms.Contains(Permissions.TaskUpdate) || await projectRepository.IsManagerOfTask(id, userId))
+            assigneeId = null;
         var task = await taskRepository.UpdateStatus(id, dto.Status, assigneeId);
         if (task == null)
             return BadRequest("任务不存在");
         return Ok(task);
     }
 
+    // 手动鉴权：拥有 task.update 权限或全部任务所属项目的负责人可批量改任意任务状态；普通用户只能改分配给自己的任务
     [HttpPatch]
     [Route("batch/status")]
-    [HasPermission(Permissions.TaskUpdate)]
+    [Authorize]
     public async Task<ActionResult<IEnumerable<TaskDto>>> UpdateStatusBatch(
         [FromBody] BatchUpdateStatusDto dto)
     {
-        var assigneeId = User.IsInRole("Admin")
-            ? null
-            : User.FindFirstValue(ClaimTypes.NameIdentifier)
-              ?? User.FindFirstValue("sub")
-              ?? User.FindFirstValue("id");
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                     ?? User.FindFirstValue("sub")
+                     ?? User.FindFirstValue("id");
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized("无法获取用户身份");
+        var perms = await cacheService.GetPermissionsAsync(userId);
+        string? assigneeId = userId;
+        if (perms.Contains(Permissions.TaskUpdate))
+        {
+            assigneeId = null;
+        }
+        else if (dto.Ids.Count > 0)
+        {
+            var managerOfAll = true;
+            foreach (var taskId in dto.Ids)
+            {
+                if (!await projectRepository.IsManagerOfTask(taskId, userId))
+                {
+                    managerOfAll = false;
+                    break;
+                }
+            }
+            if (managerOfAll)
+                assigneeId = null;
+        }
         var tasks = await taskRepository.UpdateStatusBatch(
             dto.Ids,
             dto.Status,

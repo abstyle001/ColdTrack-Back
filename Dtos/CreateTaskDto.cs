@@ -15,5 +15,8 @@ public class CreateTaskDto
 
     public DateTime? Deadline { get; set; }
 
+    [Required]
+    public long ProjectId { get; set; }
+
     public List<long>? TagIds { get; set; }
 }

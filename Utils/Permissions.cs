@@ -37,6 +37,12 @@ public static class Permissions
     public const string TagUpdate = "tag.update";
     public const string TagDelete = "tag.delete";
 
+    // 项目管理
+    public const string ProjectRead = "project.read";
+    public const string ProjectCreate = "project.create";
+    public const string ProjectUpdate = "project.update";
+    public const string ProjectDelete = "project.delete";
+
     // 系统设置：角色与权限管理
     public const string RoleManage = "role.manage";
 
