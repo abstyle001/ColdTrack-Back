@@ -50,7 +50,7 @@ public class AccountController(
                 NickName = dto.NickName ?? string.Empty,
                 City = dto.City ?? string.Empty,
                 PhoneNumber = dto.Phone ?? string.Empty,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.Now
             };
             var createUser = await userManager.CreateAsync(appUser, dto.Password);
             if (createUser.Succeeded)

@@ -114,8 +114,8 @@ public class TaskRepository(ColdTrackDbContext db)
             ProjectId = dto.ProjectId,
             Priority = priority,
             Deadline = dto.Deadline,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.Now,
+            UpdatedAt = DateTime.Now
         };
         await db.TaskItems.AddAsync(task);
 
@@ -186,7 +186,7 @@ public class TaskRepository(ColdTrackDbContext db)
         if (dto.Dependencies != null)
             await ApplyDependenciesAsync(task, dto.Dependencies);
 
-        task.UpdatedAt = DateTime.UtcNow;
+        task.UpdatedAt = DateTime.Now;
 
         // 状态写入前做依赖校验（覆盖 PUT 整体更新这一改状态入口）
         if (dto.Status != null && Enum.TryParse<TaskItem.StatusValue>(dto.Status, out var targetStatus))
@@ -241,7 +241,7 @@ public class TaskRepository(ColdTrackDbContext db)
             TaskId = taskId,
             AuthorId = authorId,
             Content = content,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.Now
         };
         await db.TaskComments.AddAsync(comment);
         await db.SaveChangesAsync();
@@ -262,7 +262,7 @@ public class TaskRepository(ColdTrackDbContext db)
         {
             await ValidateStatusTransitionAsync(task, s);
             task.Status = s;
-            task.UpdatedAt = DateTime.UtcNow;
+            task.UpdatedAt = DateTime.Now;
             await db.SaveChangesAsync();
         }
         return await GetById(id);
@@ -295,7 +295,7 @@ public class TaskRepository(ColdTrackDbContext db)
         foreach (var task in tasks)
         {
             task.Status = targetStatus;
-            task.UpdatedAt = DateTime.UtcNow;
+            task.UpdatedAt = DateTime.Now;
         }
         await db.SaveChangesAsync();
         return tasks.Select(ToDto).ToList();
@@ -303,7 +303,7 @@ public class TaskRepository(ColdTrackDbContext db)
 
     public async Task<TaskStatsDto> GetStats(string userId, bool isAdmin)
     {
-        var now = DateTime.UtcNow;
+        var now = DateTime.Now;
         var query = ApplyVisibility(db.TaskItems.AsQueryable(), userId, isAdmin);
 
         return new TaskStatsDto

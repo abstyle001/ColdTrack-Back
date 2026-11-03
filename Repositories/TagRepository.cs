@@ -19,7 +19,7 @@ public class TagRepository(ColdTrackDbContext db)
         {
             Name = dto.Name.Trim(),
             Color = dto.Color,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.Now
         };
         await db.Tags.AddAsync(tag);
         await db.SaveChangesAsync();

@@ -39,8 +39,8 @@ public class TaskItem
     [ForeignKey(nameof(ProjectId))]
     public Project Project { get; set; } = null!;
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
     public ICollection<TaskTag> TaskTags { get; set; } = new List<TaskTag>();
 

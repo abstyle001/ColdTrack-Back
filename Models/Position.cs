@@ -19,5 +19,5 @@ public class Position
     // 附加信息
     public string? Addition { get; set; } = string.Empty;
     // 创建时间
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
 }
