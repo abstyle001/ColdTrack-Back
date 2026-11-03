@@ -10,4 +10,5 @@ public class UpdateTaskDto
     public DateTime? Deadline { get; set; }
     public long? ProjectId { get; set; }
     public List<long>? TagIds { get; set; }
+    public List<TaskDependencyInputDto>? Dependencies { get; set; }
 }

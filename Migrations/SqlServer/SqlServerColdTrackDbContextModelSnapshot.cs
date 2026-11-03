@@ -774,6 +774,24 @@ namespace ColdTrack_Back.Migrations.SqlServer
                     b.ToTable("TaskComments");
                 });
 
+            modelBuilder.Entity("ColdTrack_Back.Models.TaskDependency", b =>
+                {
+                    b.Property<long>("SuccessorTaskId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("PredecessorTaskId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("DependencyType")
+                        .HasColumnType("int");
+
+                    b.HasKey("SuccessorTaskId", "PredecessorTaskId");
+
+                    b.HasIndex("PredecessorTaskId");
+
+                    b.ToTable("TaskDependencies");
+                });
+
             modelBuilder.Entity("ColdTrack_Back.Models.TaskItem", b =>
                 {
                     b.Property<long>("Id")
@@ -1042,6 +1060,25 @@ namespace ColdTrack_Back.Migrations.SqlServer
                     b.Navigation("Task");
                 });
 
+            modelBuilder.Entity("ColdTrack_Back.Models.TaskDependency", b =>
+                {
+                    b.HasOne("ColdTrack_Back.Models.TaskItem", "Predecessor")
+                        .WithMany("Dependents")
+                        .HasForeignKey("PredecessorTaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ColdTrack_Back.Models.TaskItem", "Successor")
+                        .WithMany("Dependencies")
+                        .HasForeignKey("SuccessorTaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Predecessor");
+
+                    b.Navigation("Successor");
+                });
+
             modelBuilder.Entity("ColdTrack_Back.Models.TaskItem", b =>
                 {
                     b.HasOne("ColdTrack_Back.Models.AppUser", "Assignee")
@@ -1152,6 +1189,10 @@ namespace ColdTrack_Back.Migrations.SqlServer
 
             modelBuilder.Entity("ColdTrack_Back.Models.TaskItem", b =>
                 {
+                    b.Navigation("Dependencies");
+
+                    b.Navigation("Dependents");
+
                     b.Navigation("TaskTags");
                 });
 #pragma warning restore 612, 618
