@@ -39,8 +39,13 @@ public class TaskItem
     [ForeignKey(nameof(ProjectId))]
     public Project Project { get; set; } = null!;
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
     public ICollection<TaskTag> TaskTags { get; set; } = new List<TaskTag>();
+
+    // 本任务作为后置任务（其前置任务列表）
+    public ICollection<TaskDependency> Dependencies { get; set; } = new List<TaskDependency>();
+    // 本任务作为前置任务（其依赖它的后置任务列表）
+    public ICollection<TaskDependency> Dependents { get; set; } = new List<TaskDependency>();
 }

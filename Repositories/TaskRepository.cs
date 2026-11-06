@@ -25,6 +25,8 @@ public class TaskRepository(ColdTrackDbContext db)
             .OrderByDescending(t => t.CreatedAt)
             .Include(t => t.Project)
             .Include(t => t.TaskTags).ThenInclude(tt => tt.Tag)
+            .Include(t => t.Dependencies).ThenInclude(d => d.Predecessor)
+            .Include(t => t.Dependents).ThenInclude(d => d.Successor)
             .Select(t => ToDto(t))
             .ToListAsync();
     }
@@ -36,6 +38,8 @@ public class TaskRepository(ColdTrackDbContext db)
             .Include(t => t.Creator)
             .Include(t => t.Project)
             .Include(t => t.TaskTags).ThenInclude(tt => tt.Tag)
+            .Include(t => t.Dependencies).ThenInclude(d => d.Predecessor)
+            .Include(t => t.Dependents).ThenInclude(d => d.Successor)
             .FirstOrDefaultAsync(t => t.Id == id);
         return task == null ? null : ToDto(task);
     }
@@ -62,6 +66,8 @@ public class TaskRepository(ColdTrackDbContext db)
             .Take(size)
             .Include(t => t.Project)
             .Include(t => t.TaskTags).ThenInclude(tt => tt.Tag)
+            .Include(t => t.Dependencies).ThenInclude(d => d.Predecessor)
+            .Include(t => t.Dependents).ThenInclude(d => d.Successor)
             .Select(t => ToDto(t))
             .ToListAsync();
     }
@@ -108,8 +114,8 @@ public class TaskRepository(ColdTrackDbContext db)
             ProjectId = dto.ProjectId,
             Priority = priority,
             Deadline = dto.Deadline,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.Now,
+            UpdatedAt = DateTime.Now
         };
         await db.TaskItems.AddAsync(task);
 
@@ -121,6 +127,9 @@ public class TaskRepository(ColdTrackDbContext db)
                 task.TaskTags.Add(new TaskTag { TagId = tagId });
         }
 
+        if (dto.Dependencies != null && dto.Dependencies.Count > 0)
+            await ApplyDependenciesAsync(task, dto.Dependencies);
+
         await db.SaveChangesAsync();
         return await GetById(task.Id) ?? throw new InvalidOperationException("Failed to load created task");
     }
@@ -129,6 +138,7 @@ public class TaskRepository(ColdTrackDbContext db)
     {
         var task = await db.TaskItems
             .Include(t => t.TaskTags)
+            .Include(t => t.Dependencies).ThenInclude(d => d.Predecessor)
             .FirstOrDefaultAsync(t => t.Id == id);
         if (task == null) return null;
 
@@ -150,8 +160,6 @@ public class TaskRepository(ColdTrackDbContext db)
             }
             task.ProjectId = dto.ProjectId.Value;
         }
-        if (dto.Status != null && Enum.TryParse<TaskItem.StatusValue>(dto.Status, out var s))
-            task.Status = s;
         if (dto.Priority != null && Enum.TryParse<TaskItem.PriorityValue>(dto.Priority, out var p))
             task.Priority = p;
         if (dto.Deadline != null) task.Deadline = dto.Deadline;
@@ -174,7 +182,18 @@ public class TaskRepository(ColdTrackDbContext db)
                 task.TaskTags.Add(new TaskTag { TaskId = id, TagId = tagId });
         }
 
-        task.UpdatedAt = DateTime.UtcNow;
+        // 依赖整体替换（传入则重建；需在更改状态时先完成依赖校验）
+        if (dto.Dependencies != null)
+            await ApplyDependenciesAsync(task, dto.Dependencies);
+
+        task.UpdatedAt = DateTime.Now;
+
+        // 状态写入前做依赖校验（覆盖 PUT 整体更新这一改状态入口）
+        if (dto.Status != null && Enum.TryParse<TaskItem.StatusValue>(dto.Status, out var targetStatus))
+        {
+            await ValidateStatusTransitionAsync(task, targetStatus);
+            task.Status = targetStatus;
+        }
 
         await db.SaveChangesAsync();
         return await GetById(task.Id);
@@ -222,7 +241,7 @@ public class TaskRepository(ColdTrackDbContext db)
             TaskId = taskId,
             AuthorId = authorId,
             Content = content,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.Now
         };
         await db.TaskComments.AddAsync(comment);
         await db.SaveChangesAsync();
@@ -235,15 +254,15 @@ public class TaskRepository(ColdTrackDbContext db)
 
     public async Task<TaskDto?> UpdateStatus(long id, string status, string? assigneeId = null)
     {
-        var query = db.TaskItems.Where(t => t.Id == id);
-        if (!string.IsNullOrEmpty(assigneeId))
-            query = query.Where(t => t.AssigneeId == assigneeId);
-        var task = await query.FirstOrDefaultAsync();
+        var task = await db.TaskItems
+            .Include(t => t.Dependencies).ThenInclude(d => d.Predecessor)
+            .FirstOrDefaultAsync(t => t.Id == id && (string.IsNullOrEmpty(assigneeId) || t.AssigneeId == assigneeId));
         if (task == null) return null;
         if (Enum.TryParse<TaskItem.StatusValue>(status, out var s))
         {
+            await ValidateStatusTransitionAsync(task, s);
             task.Status = s;
-            task.UpdatedAt = DateTime.UtcNow;
+            task.UpdatedAt = DateTime.Now;
             await db.SaveChangesAsync();
         }
         return await GetById(id);
@@ -265,11 +284,18 @@ public class TaskRepository(ColdTrackDbContext db)
         var tasks = await query
             .Include(t => t.Project)
             .Include(t => t.TaskTags).ThenInclude(tt => tt.Tag)
+            .Include(t => t.Dependencies).ThenInclude(d => d.Predecessor)
+            .Include(t => t.Dependents).ThenInclude(d => d.Successor)
             .ToListAsync();
+
+        // 保守校验：以批量执行前状态快照逐任务校验，任一阻塞则整批拒绝
+        foreach (var task in tasks)
+            await ValidateStatusTransitionAsync(task, targetStatus);
+
         foreach (var task in tasks)
         {
             task.Status = targetStatus;
-            task.UpdatedAt = DateTime.UtcNow;
+            task.UpdatedAt = DateTime.Now;
         }
         await db.SaveChangesAsync();
         return tasks.Select(ToDto).ToList();
@@ -277,7 +303,7 @@ public class TaskRepository(ColdTrackDbContext db)
 
     public async Task<TaskStatsDto> GetStats(string userId, bool isAdmin)
     {
-        var now = DateTime.UtcNow;
+        var now = DateTime.Now;
         var query = ApplyVisibility(db.TaskItems.AsQueryable(), userId, isAdmin);
 
         return new TaskStatsDto
@@ -332,6 +358,176 @@ public class TaskRepository(ColdTrackDbContext db)
         Deadline = t.Deadline.HasValue ? t.Deadline.Value.ToString("yyyy-MM-dd HH:mm:ss") : null,
         CreatedAt = t.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"),
         UpdatedAt = t.UpdatedAt.ToString("yyyy-MM-dd HH:mm:ss"),
-        Tags = t.TaskTags.Select(tt => ToTagDto(tt.Tag)).ToList()
+        Tags = t.TaskTags.Select(tt => ToTagDto(tt.Tag)).ToList(),
+        Dependencies = t.Dependencies
+            .Where(d => d.Predecessor != null)
+            .Select(d => new TaskDependencyDto
+            {
+                TaskId = d.PredecessorTaskId,
+                Title = d.Predecessor.Title,
+                DependencyType = d.DependencyType.ToString()
+            }).ToList(),
+        Dependents = t.Dependents
+            .Where(d => d.Successor != null)
+            .Select(d => new TaskDependencyDto
+            {
+                TaskId = d.SuccessorTaskId,
+                Title = d.Successor.Title,
+                DependencyType = d.DependencyType.ToString()
+            }).ToList()
     };
+
+    // ===== 任务依赖：写入与校验 =====
+
+    /// <summary>
+    /// 将输入依赖解析并整体替换到 task.Dependencies。
+    /// 校验：依赖类型合法、去重、前置任务存在、同项目、非自依赖；合并后做环路检测。
+    /// </summary>
+    private async Task ApplyDependenciesAsync(TaskItem task, List<TaskDependencyInputDto> inputs)
+    {
+        var parsed = new List<(long PredecessorId, TaskDependency.DependencyTypeValue Type)>();
+        foreach (var input in inputs)
+        {
+            if (!Enum.TryParse<TaskDependency.DependencyTypeValue>(input.DependencyType, out var type))
+                throw new InvalidOperationException("无效的依赖类型");
+            parsed.Add((input.PredecessorTaskId, type));
+        }
+
+        // 去重（按前置任务 Id，同一前置只保留一条）
+        var distinct = parsed
+            .GroupBy(p => p.PredecessorId)
+            .Select(g => g.First())
+            .ToList();
+
+        if (distinct.Count == 0)
+        {
+            task.Dependencies.Clear();
+            return;
+        }
+
+        var predecessorIds = distinct.Select(p => p.PredecessorId).ToList();
+        var predecessors = await db.TaskItems
+            .Where(t => predecessorIds.Contains(t.Id))
+            .Select(t => new { t.Id, t.ProjectId, t.Title })
+            .ToDictionaryAsync(t => t.Id);
+
+        foreach (var p in distinct)
+        {
+            if (p.PredecessorId == task.Id)
+                throw new InvalidOperationException("任务不能依赖自身");
+            if (!predecessors.TryGetValue(p.PredecessorId, out var pred))
+                throw new InvalidOperationException("前置任务不存在");
+            if (pred.ProjectId != task.ProjectId)
+                throw new InvalidOperationException("前置任务必须与后置任务属于同一项目");
+        }
+
+        // 环路检测（防止整体替换引入环）
+        var newEdges = distinct.Select(p => p.PredecessorId).ToHashSet();
+        await DetectCycleAsync(task.Id, newEdges);
+
+        // 校验通过后整体替换
+        task.Dependencies.Clear();
+        foreach (var p in distinct)
+        {
+            task.Dependencies.Add(new TaskDependency
+            {
+                SuccessorTaskId = task.Id,
+                PredecessorTaskId = p.PredecessorId,
+                DependencyType = p.Type
+            });
+        }
+    }
+
+    /// <summary>
+    /// 环路检测：从 successor 出发沿 Predecessor 边 DFS，若可达自身则成环。
+    /// 加载全量依赖边构建邻接表，保证不遗漏中间节点，正确性优先（任务规模有限，可接受）。
+    /// </summary>
+    private async Task DetectCycleAsync(long successorId, HashSet<long> proposedPredecessors)
+    {
+        // 加载全量依赖边，构建「后置 → 前置」邻接表
+        var edges = new Dictionary<long, List<long>>();
+        var rows = await db.TaskDependencies
+            .AsNoTracking()
+            .Select(d => new { d.SuccessorTaskId, d.PredecessorTaskId })
+            .ToListAsync();
+        foreach (var r in rows)
+        {
+            if (!edges.TryGetValue(r.SuccessorTaskId, out var list))
+                edges[r.SuccessorTaskId] = list = new List<long>();
+            list.Add(r.PredecessorTaskId);
+        }
+
+        // 用提议集合整体替换 successor 的出边
+        edges[successorId] = proposedPredecessors.ToList();
+
+        // 迭代式 DFS：successor 能否沿依赖边回到自身
+        var stack = new Stack<long>();
+        var visited = new HashSet<long>();
+        stack.Push(successorId);
+        while (stack.Count > 0)
+        {
+            var cur = stack.Pop();
+            if (edges.TryGetValue(cur, out var nexts))
+            {
+                foreach (var next in nexts)
+                {
+                    if (next == successorId)
+                        throw new InvalidOperationException("存在循环依赖");
+                    if (visited.Add(next))
+                        stack.Push(next);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 依赖校验：将任务置为 newStatus 时检查其前置依赖是否满足约束（懒校验）。
+    /// 按 PredecessorTaskId 直接查询前置任务状态，不依赖导航属性是否已加载，
+    /// 以便在「同一次更新中新增依赖并改状态」时也能正确校验。
+    /// </summary>
+    private async Task ValidateStatusTransitionAsync(TaskItem task, TaskItem.StatusValue newStatus)
+    {
+        if (newStatus == TaskItem.StatusValue.Todo)
+            return; // 回到待办/未开始，无约束
+
+        var predecessorIds = task.Dependencies
+            .Select(d => d.PredecessorTaskId)
+            .Distinct()
+            .ToList();
+        if (predecessorIds.Count == 0)
+            return;
+
+        var preds = await db.TaskItems
+            .Where(t => predecessorIds.Contains(t.Id))
+            .Select(t => new { t.Id, t.Status, t.Title })
+            .ToDictionaryAsync(t => t.Id);
+
+        foreach (var dep in task.Dependencies)
+        {
+            if (!preds.TryGetValue(dep.PredecessorTaskId, out var pred))
+                continue; // 前置任务已不存在（罕见），忽略
+
+            switch (dep.DependencyType)
+            {
+                case TaskDependency.DependencyTypeValue.FinishToStart:
+                    if (pred.Status != TaskItem.StatusValue.Completed)
+                        throw new InvalidOperationException($"前置任务「{pred.Title}」尚未完成，无法开始");
+                    break;
+                case TaskDependency.DependencyTypeValue.StartToStart:
+                    if (pred.Status == TaskItem.StatusValue.Todo)
+                        throw new InvalidOperationException($"前置任务「{pred.Title}」尚未开始");
+                    break;
+                case TaskDependency.DependencyTypeValue.FinishToFinish:
+                    if (newStatus == TaskItem.StatusValue.Completed
+                        && pred.Status != TaskItem.StatusValue.Completed)
+                        throw new InvalidOperationException($"前置任务「{pred.Title}」尚未完成，无法完成");
+                    break;
+                case TaskDependency.DependencyTypeValue.StartToFinish:
+                    if (newStatus == TaskItem.StatusValue.Completed
+                        && pred.Status == TaskItem.StatusValue.Todo)
+                        throw new InvalidOperationException($"前置任务「{pred.Title}」尚未开始，无法完成");
+                    break;
+            }
+        }
+    }
 }

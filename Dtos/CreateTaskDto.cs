@@ -19,4 +19,6 @@ public class CreateTaskDto
     public long ProjectId { get; set; }
 
     public List<long>? TagIds { get; set; }
+
+    public List<TaskDependencyInputDto>? Dependencies { get; set; }
 }

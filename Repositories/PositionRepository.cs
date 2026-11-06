@@ -47,7 +47,7 @@ public class PositionRepository(ColdTrackDbContext db)
             Duty = dto.Duty,
             Workspace = dto.Workspace,
             Addition = dto.Addition,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.Now
         };
         await db.Positions.AddAsync(position);
         await db.SaveChangesAsync();

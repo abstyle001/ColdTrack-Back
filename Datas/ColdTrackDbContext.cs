@@ -22,6 +22,7 @@ public class ColdTrackDbContext(DbContextOptions options) : IdentityDbContext<Ap
     public DbSet<TaskTag> TaskTags { get; set; }
     public DbSet<Project> Projects { get; set; }
     public DbSet<ProjectMember> ProjectMembers { get; set; }
+    public DbSet<TaskDependency> TaskDependencies { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -130,6 +131,25 @@ public class ColdTrackDbContext(DbContextOptions options) : IdentityDbContext<Ap
                   .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasIndex(t => t.ProjectId);
+        });
+
+        builder.Entity<TaskDependency>(entity =>
+        {
+            entity.HasKey(d => new { d.SuccessorTaskId, d.PredecessorTaskId });
+
+            // 删除任务时级联删除其作为前置/后置的所有依赖边
+            entity.HasOne(d => d.Successor)
+                  .WithMany(t => t.Dependencies)
+                  .HasForeignKey(d => d.SuccessorTaskId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(d => d.Predecessor)
+                  .WithMany(t => t.Dependents)
+                  .HasForeignKey(d => d.PredecessorTaskId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // 支持「谁依赖了我」的反向查询与环路检测
+            entity.HasIndex(d => d.PredecessorTaskId);
         });
 
         // 权限目录种子

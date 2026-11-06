@@ -59,8 +59,8 @@ public class ProjectRepository(ColdTrackDbContext db)
             Status = status,
             StartDate = dto.StartDate,
             EndDate = dto.EndDate,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.Now,
+            UpdatedAt = DateTime.Now
         };
         await db.Projects.AddAsync(project);
 
@@ -119,7 +119,7 @@ public class ProjectRepository(ColdTrackDbContext db)
         if (project.ManagerId != null && project.Members.All(m => m.UserId != project.ManagerId))
             project.Members.Add(new ProjectMember { ProjectId = id, UserId = project.ManagerId });
 
-        project.UpdatedAt = DateTime.UtcNow;
+        project.UpdatedAt = DateTime.Now;
 
         await db.SaveChangesAsync();
         return await GetById(project.Id);

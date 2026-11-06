@@ -17,4 +17,6 @@ public class TaskDto
     public string CreatedAt { get; set; } = string.Empty;
     public string UpdatedAt { get; set; } = string.Empty;
     public List<TagDto> Tags { get; set; } = new();
+    public List<TaskDependencyDto> Dependencies { get; set; } = new();
+    public List<TaskDependencyDto> Dependents { get; set; } = new();
 }

@@ -14,7 +14,7 @@ public class Tag
 
     public string? Color { get; set; }
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
 
     public ICollection<TaskTag> TaskTags { get; set; } = new List<TaskTag>();
 }
